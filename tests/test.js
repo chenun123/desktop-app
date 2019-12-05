@@ -56,10 +56,10 @@ User.init(function() {
 });
 
 
-/*
+
 Api.auth('e@a.com', 'abc123');
 User.getAllUsers();
-*/
+
 
 /*
 Note.hasNotes('54bdc65599c37b0da9000005', function(doc) {

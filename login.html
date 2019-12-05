@@ -27,11 +27,11 @@ if(process.platform != 'darwin') {
 	</div>
 
 	<div class="bottom">
-		<a id="localAccount" onclick="openExternal('https://leanote.com/register')"  class="lang localAccount">Sign up Leanote</a>
+		<a id="registerAccount" onclick="openExternal('https://leanote.com/register')"  class="lang localAccount">Sign up Leanote</a>
 
 		<a id="customServer" class="lang customServer">Sign in to Self-hosted Service</a>
 
-		<!-- <a id="localAccount" class="lang localAccount">Create Local Account</a> -->
+		<a id="localAccount" class="lang localAccount">Create Local Account</a>
 
 		<a id="loginWithLeanote" class="lang loginWithLeanote">Sign in to Leanote</a>
 	</div>
@@ -223,7 +223,8 @@ $(function() {
 		}
 		$body.addClass('loading');
 		hideMsg();
-		UserService.createLocalUser(username, pwd1, function(ret, dbuser) {
+		(function() {
+			UserService.createLocalUser(username, pwd1, function(ret, dbuser) {
 			if(ret) {
 				setTimeout(function(){
 					$body.removeClass('loading');
@@ -235,6 +236,9 @@ $(function() {
 				showMsg(getMsg(dbuser));
 			}
 		});
+		})();
+
+		
 	});
 
 	var $loginBtnO = $("#loginBtn");
@@ -276,13 +280,13 @@ $(function() {
 		hideMsg();
 	});
 
-	/*
+	
 	$('#localAccount').click(function() {
 		$body.addClass('local-account');
 		$('#username').focus();
 		hideMsg();
 	});
-	*/
+	
 
 	$('#loginWithLeanote').click(function () {
 		$body.removeClass('local-account custom-server');

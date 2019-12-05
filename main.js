@@ -21,20 +21,35 @@ crashReporter.start({
 var mainWindow = null;
 
 // single instance
-const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
-  // Someone tried to run a second instance, we should focus our window.
+// const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
+//   // Someone tried to run a second instance, we should focus our window.
+//   if (mainWindow) {
+//     mainWindow.show();
+//     if (mainWindow.isMinimized()) {
+//       mainWindow.restore();
+//     }
+//     mainWindow.focus();
+//   }
+// })
+
+// if (shouldQuit) {
+//   app.quit()
+// }
+
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  //已经存在
+  app.quit()
+} else {
   if (mainWindow) {
-    mainWindow.show();
     if (mainWindow.isMinimized()) {
       mainWindow.restore();
     }
+    mainWindow.show();
     mainWindow.focus();
   }
-})
-
-if (shouldQuit) {
-  app.quit()
 }
+
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function() {
@@ -186,7 +201,8 @@ function openIt() {
   );
 
   console.log('load: file://' + __dirname + '/note.html');
-
+  
+  mainWindow.webContents.openDevTools();
   // and load the index.html of the app.
   mainWindow.loadURL('file://' + __dirname + '/note.html');
 

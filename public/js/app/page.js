@@ -625,6 +625,20 @@ $(function() {
             var url = $(this).attr('href');
             if (isOtherSiteUrl(url)) {
                 openExternal(url);
+            }else if (isAttachUrl(url)) {
+                console.log('click attach ->' + url);
+                (function(k) {
+                    // 打开附件
+                    var reg = new RegExp(EvtService.getAttachLocalUrlPrefix() + '\\?fileId=([0-9a-zA-Z]{24})', 'g');
+                    var matches = reg.exec(k);
+                    if (matches) {
+                        var fileid = matches[1];
+                        if(attach_content_var) {
+                            attach_content_var.openAttach(fileid);
+                        }
+                        
+                    }
+                })(url);       
             }
         }
         return false;
@@ -635,7 +649,25 @@ $(function() {
         var url = $(this).attr('href');
         if (isOtherSiteUrl(url)) {
             openExternal(url);
+        } else if (isAttachUrl(url)) {
+            console.log('click attach ->' + url);
+            (function(k) {
+                // 打开附件
+                var reg = new RegExp(EvtService.getAttachLocalUrlPrefix() + '\\?fileId=([0-9a-zA-Z]{24})', 'g');
+                var matches = reg.exec(k);
+                if (matches) {
+                    var fileid = matches[1];
+                    if(attach_content_var) {
+                        attach_content_var.openAttach(fileid);
+                    }
+                    
+                }
+            })(url);
+
+            
+            
         }
+
     });
 
     // markdown编辑器paste

@@ -1519,6 +1519,8 @@ function goToMainPage() {
 }
 
 function toLogin() {
+	//alert('test');
+	//return;
 	const {ipcRenderer} = require('electron');
 	var ipc = ipcRenderer;
 	// var BrowserWindow = gui.remote.BrowserWindow;
@@ -1795,6 +1797,10 @@ function isURL(str_url) {
 
 function isOtherSiteUrl(url) {
 	return url.indexOf('http://127.0.0.1') < 0 && isURL(url);
+}
+
+function isAttachUrl(url) {
+	return url.indexOf(EvtService.getAttachLocalUrlPrefix()) == 0;
 }
 
 function reloadApp() {

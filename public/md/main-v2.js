@@ -7904,8 +7904,8 @@ else
                 ()()()()            // pad rest of backreferences
             /g, writeImageTag);
             */
+            //text = text.replace(/(!\[(.*?)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()()/g, writeImageTag);
             text = text.replace(/(!\[(.*?)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeImageTag);
-
             //
             // Next, handle inline images:  ![alt text](url "optional title")
             // Don't forget: encode * and _
@@ -7932,8 +7932,11 @@ else
                 )
             /g, writeImageTag);
             */
+            // 对于 添加大小的情况 , 则处理函数增加参数 m8
+            // /(!\[(.*?)\]\s?\([ \t]*()<?(\S+?)>?[ \t]*((['"])(.*?)\6[ \t]*)?([ ]\d*?x\d*?)?\))/g
+            
+            //text = text.replace(/(!\[(.*?)\]\s?\([ \t]*()<?(\S+?)>?[ \t]*((['"])(.*?)\6[ \t]*)?([ ]\d*?x\d*?)?\))/g, writeImageTag);
             text = text.replace(/(!\[(.*?)\]\s?\([ \t]*()<?(\S+?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeImageTag);
-
             return text;
         }
         

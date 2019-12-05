@@ -2581,6 +2581,15 @@ var Attach = {
         self.attachListO.click(function(e) {
             e.stopPropagation();
         });
+        // view
+        self.attachListO.on("click", ".view-attach", function(e) {
+            e.stopPropagation();
+            var attachId = $(this).closest('li').data("id");
+            var t = this;
+            self.viewAttach(attachId);
+                // $(t).button("reset");
+            
+        });
         // 删除
         self.attachListO.on("click", ".delete-attach", function(e) {
             e.stopPropagation();
@@ -2721,7 +2730,8 @@ var Attach = {
             html += '<li class="clearfix" data-id="' + each.FileId + '">' +
                 '<div class="attach-title">' + each.Title + '</div>' +
                 '<div class="attach-process"> ' +
-                '	  <button class="btn btn-sm btn-warning delete-attach" data-loading-text="..." title="' + getMsg('Delete') + '"><i class="fa fa-trash-o"></i></button> ' +
+                '	  <button class="btn btn-sm btn-link view-attach" data-loading-text="..." title="' + getMsg('AttachView') + '"><span class="fa fa-eye"></span></button> ' +
+                '	  <button type="button" class="btn btn-sm btn-warning delete-attach" data-loading-text="..." title="' + getMsg('Delete') + '"><i class="fa fa-trash-o"></i></button> ' +
                 '	  <button type="button" class="btn btn-sm btn-primary download-attach" ' + disabled + ' title="' + getMsg('Save as') + '">' + d + '</button> ' +
                 '	  <button type="button" class="btn btn-sm btn-default link-attach" title="' + getMsg('Insert link into content') + '"><i class="fa fa-link"></i></button> ' +
                 '</div>' +
@@ -2790,6 +2800,13 @@ var Attach = {
         self.renderAttachs(attachInfo.NoteId);
         // TOOD 更新Note表
         self.updateAttachToDB(noteId);
+    },
+    // 查看
+    viewAttach: function(attachId) {
+        if(attach_content_var) {
+            attach_content_var.openAttach(attachId);
+        }
+
     },
     // 删除
     deleteAttach: function(attachId) {

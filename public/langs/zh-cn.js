@@ -336,5 +336,10 @@
     "Date Updated - ASC": "按更新时间-升序",
     "Date Updated - DESC": "按更新时间-降序",
     "Title - ASC": "按标题-升序",
-    "Title - DESC": "按标题-降序"
+    "Title - DESC": "按标题-降序",
+    "AttachView": "附件预览",
+    "title": "文件名",
+    "path": "文件路径",
+    "type": "文件类型",
+    "open with system shell": "当前格式暂不支持，已使用系统应用打开"
 }  

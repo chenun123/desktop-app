@@ -324,5 +324,7 @@
 
     "Load Database Error" : "Fehler beim Lesen der Datenbank",
 
-    "ctrl/cmd+e Toggle Modify with Readonly" : "Strg / Cmd + E wechselt zwischen berbeiten und schreibgeschützt."
+    "ctrl/cmd+e Toggle Modify with Readonly" : "Strg / Cmd + E wechselt zwischen berbeiten und schreibgeschützt.",
+
+    "AttachView": "Attach View"
 }

@@ -13,4 +13,5 @@
 var requireWeb = require;
 setTimeout(function () {
     requireWeb(['public/js/dec/history']);
+    requireWeb(['public/js/dec/openattach']);
 });

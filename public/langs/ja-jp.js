@@ -330,5 +330,6 @@
   "localAccountTips": "お客様はローカルアカウント使用しているので、 データが全てローカルに保存します。 Leanote サーバーと同期できません、 一旦ローカルに何か問題が発生した、 今のデータが全て消します、これはとても怖いです。 <br>だから、Leanoteアカウントを作成してください、 これからデータが全てLeanoteサーバーに保存して、 データ損失が回避できる。<br>今後にはLeanoteアプリでローカルアカウントを作成できない、でも元々のローカルアカウント利用できます。",
   "Don't Show Anymore": "再表示しません",
 
-  "ctrl/cmd+e Toggle Modify with Readonly": "ctrl/cmd+e 編集と閲覧を変更"
+  "ctrl/cmd+e Toggle Modify with Readonly": "ctrl/cmd+e 編集と閲覧を変更",
+  "AttachView": "Attach View"
 }

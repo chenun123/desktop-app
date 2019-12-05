@@ -334,5 +334,6 @@
     "Date Updated - ASC": "按更新時間-升序",
     "Date Updated - DESC": "按更新時間-降序",
     "Title - ASC": "按標題-升序",
-    "Title - DESC": "按標題-降序"
+    "Title - DESC": "按標題-降序",
+    "AttachView": "Attach View"
 }
