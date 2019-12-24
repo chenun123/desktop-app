@@ -255,9 +255,9 @@ Note.getNotesByNotebookId = function(notebookId) {
             continue;
         }
 
-        if (!('IsMarkdown' in note)) {
-            console.error('僵尸note------');
-        }
+        // if (!('IsMarkdown' in note)) {
+        //     console.error('僵尸note------');
+        // }
         // 不要trash的not, 共享的也不要
         if (note.IsTrash || note.IsDeleted || note.LocalIsDelete) {
             continue;
@@ -533,7 +533,7 @@ Note.setNoteDirty = function(noteId, isDirty) {
         $leftNoteNav.removeClass('item-err');
     }
     this.setNoteCache({ NoteId: noteId, IsDirty: isDirty }, false);
-    isDirty ? $leftNoteNav.addClass('item-dirty') : $leftNoteNav.removeClass('item-dirty');
+    isDirty && !UserInfo.IsLocal ? $leftNoteNav.addClass('item-dirty') : $leftNoteNav.removeClass('item-dirty');
 };
 
 // 如果当前的改变了, 就保存它
@@ -1140,7 +1140,7 @@ Note._getNoteHtmlObjct = function(note, isShared) {
             }
 
             note.Title = trimTitle(note.Title);
-            if (note.IsDirty || note.IsNew) {
+            if ((note.IsDirty || note.IsNew) && !UserInfo.IsLocal) {
                 classes += " item-dirty";
             }
             // 不是trash才要star, conflict fix

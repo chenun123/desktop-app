@@ -30,6 +30,11 @@ define(function() {
 	var async; //  = require('async');
 	var resanitize; // = require('resanitize');
 
+	var bookserivce; // = require('notebook')
+
+	var fs;// = require("fs");  
+	var path;// = require("path");  
+
 	//===========
 	// start
 
@@ -76,7 +81,9 @@ define(function() {
 
 			async = require('async');
 			resanitize = require('resanitize');
-
+			bookserivce = require('notebook');
+			fs = require("fs");  
+			path = require("path");  
 			me._inited = true;
 		},
 
@@ -481,6 +488,124 @@ define(function() {
 				});
 			});
 		},
+		mkdirsSync: function(dirname) {
+			var me = this;
+			if (fs.existsSync(dirname)) {
+				return true;
+			  } else {
+				if (me.mkdirsSync(path.dirname(dirname))) {
+				  fs.mkdirSync(dirname);
+				  return true;
+				}
+			  }
+		},
+		exportLeanoteForAll: function() {
+			var me = this;
+			// 首先取得用户所有目录,判断是否存在，
+			bookserivce.getNotebooks(function(notebooks) {
+				// 首先取得导出主目录
+				//console.log('log' + notebooks);
+				if (!notebooks || typeof notebooks != "object" || notebooks.length < 0) {
+					return;
+				}
+				// 先取得导出目录
+				me.getTargetPath(function(targetPath) {
+					if (!targetPath) {
+						return;
+					}
+	
+					me.loadingIsClosed = false;
+					Api.loading.show(Api.getMsg('plugin.export_leanote.Exporting'), 
+						{
+							hasProgress: true, 
+							isLarge: true,
+							onClose: function () {
+								me.loadingIsClosed = true;
+								setTimeout(function() {
+									me.hideLoading();
+							});
+					}});
+					Api.loading.setProgress(1);
+					// 可以先取得日志总数
+					var calcNoteNums = function(note) {
+						if(!note) return 0;
+						var subs = note['Subs'];
+						if( subs.length == 0) {
+							if(note.hasOwnProperty('NumberNotes'))
+								return note['NumberNotes'];
+							else
+								return 0;
+						}							
+						var childs = 0;
+						for(var c = 0; c < subs.length; c++) {
+							childs += calcNoteNums(subs[c]);
+						}
+						if(note.hasOwnProperty('NumberNotes'))
+							return childs += note['NumberNotes'];
+						else
+							return childs;
+					};
+
+					var NoteNums = 0;					
+					for(var i = 0; i < notebooks.length; i ++) {
+						NoteNums += calcNoteNums(notebooks[i]);
+					}
+					console.log('total notes:' + NoteNums);
+					if(NoteNums == 0) {
+						me.hideLoading();
+						return ;
+					}
+					
+					//return;
+					// 遍历
+					var cur = 0;
+					var exportOneFunc = function(notebook, tdir) {						
+						var notebookId = notebook['NotebookId'];						
+						Api.noteService.getNotes(notebookId, function(notes) {
+							if (!notes) {
+								//me.hideLoading();
+								return;
+							}
+							// 如果不存在目录则创建
+							me.mkdirsSync(tdir);
+
+							//var total = notes.length;
+							//var i = 0;
+							async.eachSeries(notes, function(note, cb) {
+								if (me.loadingIsClosed) {
+									cb();
+									//me.hideLoading();
+									return;
+								}
+								//i++;
+								cur += 1;
+								Api.loading.setProgress(100 * cur / NoteNums);
+								me._exportLeanote(note, tdir, function() {
+									cb();
+								}, cur, NoteNums);
+							}, function() {
+								if(cur == NoteNums) {
+									me.hideLoading();
+									Notify.show({title: 'Info', body: getMsg('plugin.export_leanote.exportSuccess')});
+								}
+								
+							});
+						});
+						//
+						var subs = notebook['Subs'];
+						for(var j = 0; j < subs.length; j ++) {
+							exportOneFunc(subs[j], tdir + '/' + subs[j]['Title']);
+						}
+						
+					};
+					
+					for(var i = 0,len = notebooks.length; i < len; i++) {
+						// 计算目录地址
+						exportOneFunc(notebooks[i], targetPath + '/' + notebooks[i]['Title']);						
+					}
+				});
+			});
+		},
 
 		hideLoading: function () {
 			setTimeout(function () {
@@ -552,16 +677,23 @@ define(function() {
 			}, 100);
 
 			var name = note.Title ? note.Title + '.leanote' : getMsg('Untitled') + '.leanote';
-			name = me.fixFilename(name);
+			//name = me.fixFilename(name);
 
 			var targetPath = path + Api.commonService.getPathSep() + name;
 
 			// 将路径和名字区分开
 			var pathInfo = Api.commonService.splitFile(targetPath);
-			pathInfo.nameNotExt = me.fixFilename(pathInfo.nameNotExt); // 重新修正一次
+			//pathInfo.nameNotExt = me.fixFilename(pathInfo.nameNotExt); // 重新修正一次
 			var nameNotExt = pathInfo.nameNotExt;
 			pathInfo.nameNotExtRaw = pathInfo.nameNotExt;
 
+			//
+			
+			me.render(note, function (content) {
+				Api.commonService.writeFile(pathInfo.getFullPath(), content);
+				callback();
+			});
+			return ;
 			// 得到可用文件的绝对路径
 			me.getExportedFilePath(pathInfo, 1, function(absLeanoteFilePath) {
 				me.render(note, function (content) {
@@ -601,7 +733,22 @@ define(function() {
 		        		me.exportLeanoteForNotebook(notebookId);
 		        	}
 		        })()
-		    });
+			});
+			
+			// 针对全部导出
+			Api.addExportAllMenu({
+				label: Api.getMsg('plugin.export_leanote.export'),
+				enabled: function() {
+		        	return true;
+		        },
+		        click: (function() {
+		        	return function() {
+		        		me.init();
+		        		me.exportLeanoteForAll();
+		        	}
+		        })()
+			});
+
 		},
 		// 打开后
 		onOpenAfter: function() {

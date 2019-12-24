@@ -2138,6 +2138,32 @@ function userMenu(allUsers) {
             click: function(e) {}
         });
 
+        var exportAllSubMenus = new gui.Menu();
+        var exportAllMenus = Api.getExportAllMenus() || [];
+        for(var i = 0; i < exportAllMenus.length; ++i) {
+            (function(j) {
+                var menu = exportAllMenus[j];
+                var clickBac = menu.click;
+
+                var menuItem = new gui.MenuItem({
+                    label: menu.label,
+                    click: function(e) {                        
+                        clickBac && clickBac();
+                    }
+                });
+                exportAllMenus[j].menu = menuItem;
+                exportAllSubMenus.append(menuItem);
+            })(i);
+        }
+
+        // 导出所有笔记
+        this.exportAll = new gui.MenuItem({
+            label: getMsg('Export all notes'),
+            submenu: exportAllSubMenus,
+            click: function(e) {                
+            }
+        });
+
         // 注销
         this.logout = new gui.MenuItem({
             label: getMsg('Logout'),
@@ -2176,6 +2202,7 @@ function userMenu(allUsers) {
                 checkForUpdates();
             }
         });
+        
 
         this.debug = new gui.MenuItem({
             label: getMsg('Toggle DevTools'),
@@ -2195,6 +2222,7 @@ function userMenu(allUsers) {
             this.menu.append(this.blog);
         }
         this.menu.append(new gui.MenuItem({ type: 'separator' }));
+        this.menu.append(this.exportAll);
         this.menu.append(this.logout);
         this.menu.append(this.switchAccount);
         this.menu.append(allUsersMenu);
@@ -2226,8 +2254,8 @@ function userMenu(allUsers) {
             height += 90;
         }
 
-        this.menu.append(new gui.MenuItem({ type: 'separator' }));
-        this.menu.append(this.checkForUpdates);
+        // this.menu.append(new gui.MenuItem({ type: 'separator' }));
+        // this.menu.append(this.checkForUpdates);
 
         this.menu.append(new gui.MenuItem({ type: 'separator' }));
 

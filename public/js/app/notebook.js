@@ -922,8 +922,8 @@ Notebook.setDirtyOrNewForSub = function(notebookId, isDirty, isNew) {
 Notebook._setDirtyOrNew = function(notebookId, isDirty, isNew) {
     var $o = $('#' + notebookId + '_a');
     if ($o.length) {
-        isDirty ? $o.addClass('nb-dirty') : $o.removeClass('nb-dirty');
-        isNew ? $o.addClass('nb-new') : $o.removeClass('nb-new');
+        isDirty && !UserInfo.IsLocal ? $o.addClass('nb-dirty') : $o.removeClass('nb-dirty');
+        isNew && !UserInfo.IsLocal ? $o.addClass('nb-new') : $o.removeClass('nb-new');
         return true;
     }
     return false;

@@ -374,7 +374,11 @@ define(function() {
 		        		me.exportHTMLForNotebook(notebookId);
 		        	}
 		        })()
-		    });
+			});
+			
+			// 针对全部导出
+			
+
 		},
 		// 打开后
 		onOpenAfter: function() {

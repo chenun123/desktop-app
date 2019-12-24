@@ -188,6 +188,7 @@
 	"Search note": "搜索笔记",
 	"Search notebook": "搜索笔记本",
 
+    "Export all notes": "导出所有笔记",
     "Add account": "添加帐户",
 	"Switch account": "切换帐户",
 	"Sync": "同步",

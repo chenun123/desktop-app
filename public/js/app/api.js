@@ -190,6 +190,18 @@ var Api = {
 		return me._exportMenusForNotebook;
 	},
 
+	// 针对全部导出
+	_exportAllMenus: [],
+	addExportAllMenu: function(menu) {
+		var me = this;
+		me._exportAllMenus.push(menu);
+	},
+	getExportAllMenus: function() {
+		var me = this;
+		return me._exportAllMenus;
+	},
+	
+
 	// 更多菜单
 	_moreMenus: [],
 	getMoreMenus: function() {

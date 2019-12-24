@@ -1194,10 +1194,10 @@
 			// life
 			// 加入notebookId
 			var classes = 'notebook-item ';
-			if (node.IsDirty) {
+			if (!UserInfo.IsLocal && node.IsDirty) {
 				classes += "nb-dirty "
 			}
-			if (node.IsNew) {
+			if (!UserInfo.IsLocal && node.IsNew) {
 				classes += "nb-new ";
 			}
 			html.push("<a id='", node.tId, consts.id.A, "' class='" + classes, consts.className.LEVEL, node.level,"' treeNode", consts.id.A," onclick=\"", (node.click || ''),
