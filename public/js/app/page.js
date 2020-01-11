@@ -2164,6 +2164,32 @@ function userMenu(allUsers) {
             }
         });
 
+        var importAllSubMenus = new gui.Menu();
+        var importAllMenus = Api.getImportAllMenus() || [];
+        for(var i = 0; i < importAllMenus.length; ++i) {
+            (function(j) {
+                var menu = importAllMenus[j];
+                var clickBac = menu.click;
+
+                var menuItem = new gui.MenuItem({
+                    label: menu.label,
+                    click: function(e) {                        
+                        clickBac && clickBac();
+                    }
+                });
+                importAllMenus[j].menu = menuItem;
+                importAllSubMenus.append(menuItem);
+            })(i);
+        }
+
+        // 导入笔记
+        this.importAll = new gui.MenuItem({
+            label: getMsg('Import all notes'),
+            submenu: importAllSubMenus,
+            click: function(e) {                
+            }
+        });
+
         // 注销
         this.logout = new gui.MenuItem({
             label: getMsg('Logout'),
@@ -2223,6 +2249,8 @@ function userMenu(allUsers) {
         }
         this.menu.append(new gui.MenuItem({ type: 'separator' }));
         this.menu.append(this.exportAll);
+        this.menu.append(this.importAll);
+        this.menu.append(new gui.MenuItem({ type: 'separator' }));
         this.menu.append(this.logout);
         this.menu.append(this.switchAccount);
         this.menu.append(allUsersMenu);

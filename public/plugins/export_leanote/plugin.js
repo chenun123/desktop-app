@@ -174,6 +174,7 @@ define(function() {
 
 				var noteInfo = {
 					title: note.Title,
+					noteId: note.NoteId,
 					content: !note.IsMarkdown ? me.fixContent(content) : content,
 					tags: note.Tags,
 					author: Api.userService.email || Api.userService.username || '',
@@ -306,7 +307,7 @@ define(function() {
 
 			var allMatchs = allImages.concat(allAttachs);
 
-			if (allMatchs.length == 0) {
+			if (allMatchs.length == 0 || !note.Attachs || note.Attachs.length == 0) {
 				callback(content, []);
 				return;
 			}
@@ -648,6 +649,9 @@ define(function() {
 					i++;
 					Api.loading.setProgress(100 * i / total);
 					Api.noteService.getNote(noteId, function(note) {
+						// 获取attach
+						console.log(note.Attachs);
+
 		        		me._exportLeanote(note, targetPath, function() {
 		        			cb();
 		        		}, i, total);

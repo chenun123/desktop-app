@@ -210,6 +210,7 @@
 	"Remove": "移除",
 	"Export": "导出",
     "Export notes": "导出笔记",
+    "Import all notes": "导入笔记",
 	"Histories": "历史记录",
     "Created": "创建",
     "Updated": "更新",

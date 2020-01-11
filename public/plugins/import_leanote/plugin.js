@@ -5,7 +5,7 @@
  */
 define(function() {
 	var importService; //  = nodeRequire('./public/plugins/import_leanote/import');
-
+	var bookserivce; // = require('notebook')	
 	var leanote = {
 
 		langs: {
@@ -30,7 +30,8 @@ define(function() {
 				"Done! %s notes imported!": "完成, 成功导入 %s 个笔记!",
 				"Import file: %s Success!": "文件 %s 导入成功!",
 				"Import file: %s Failure, is leanote file ?": "文件 %s 导入失败! 是Leanote文件?",
-				"Import: %s Success!": "导入笔记: %s 成功!"
+				"Import: %s Success!": "导入笔记: %s 成功!",
+				"All": "所有"
 			},
 			'zh-hk': {
 				'importLeanote': '導入Leanote',
@@ -74,7 +75,13 @@ define(function() {
 	                    <a id="chooseLeanoteFile" class="btn btn-success btn-choose-file">
 	                      <i class="fa fa-upload"></i>
 	                      <span class="lang">Choose Leanote files(.leanote)</span>
-	                    </a>
+						</a>
+						<a id="chooseLeanoteDir" class="btn btn-success btn-choose-file">
+	                      <i class="fa fa-upload"></i>
+	                      <span class="lang">Choose Leanote root dir</span>
+						</a>
+						
+
 	                    <!-- 消息 -->
 	                    <div id="importLeanoteMsg" class="alert alert-info">
 	                        <div class="curImportFile"></div>
@@ -99,6 +106,7 @@ define(function() {
 		`,
 		_importDialog: null,
 		_curNotebook: null,
+		_notebooks: null, 
 		_inited: false,
 
 		getMsg: function(txt, data) {
@@ -108,6 +116,7 @@ define(function() {
 		init: function() {
 			var me = this;
 			me._inited = true;
+			bookserivce = require('notebook');
 			$('body').append(me._tpl);
 			me._importDialog = $("#importLeanoteDialog");
 
@@ -176,12 +185,58 @@ define(function() {
 				);
 
 			});
+
+			$('#chooseLeanoteDir').click(function(){
+				// 点击
+				Api.gui.dialog.showOpenDialog(Api.gui.getCurrentWindow(),
+				{
+					properties: ['openDirectory'],
+				},
+				function(dir) {
+					if(!dir)
+						return;
+					
+					// 获取当前目录所有笔记，并将路径进行拆分
+					
+
+
+
+					// 通过全局笔记判断， 获取到需要更新的 & 添加的笔记
+
+					if(me._curNotebook != null) {
+						console.log("在子菜单中导入" + dir);
+						// 获取当前Notebookid
+						
+						// 获取当前notebook下所有子文件夹
+
+					} else {
+						console.log("全局导入" + dir);
+						// 所有全局所有文件夹
+
+
+					}
+				}
+				);
+			});
+
 		},
 
 		clear: function() {
 			$('#importLeanoteMsg .curImportFile').html("");
 			$('#importLeanoteMsg .curImportNote').html("");
 			$('#importLeanoteMsg .allImport').html('');
+		},
+		loadAllNotes: function() {
+			var me = this;
+			bookserivce.getNotebooks(function(notebooks) {
+				// 首先取得导出主目录
+				//console.log('log' + notebooks);
+				if (!notebooks || typeof notebooks != "object" || notebooks.length < 0) {
+					me._notebooks = [];
+					return;
+				}
+				me._notebooks = notebooks;
+			});
 		},
 
 		open: function(notebook) {
@@ -192,14 +247,31 @@ define(function() {
 			if(!me._inited) {
 				me.init();
 			}
-			me.clear();
-
+			me.clear();			
 			$('#importDialogNotebookLeanote').html(notebook.Title);
-
+			$('#chooseLeanoteFile').show();
 			me._curNotebook = notebook;
 			var notebookId = notebook.NotebookId;
+			// 获取所有笔记本
+			me.loadAllNotes();
 			me._importDialog.modal('show');
 		},
+		opendir: function() {
+			var me = this;
+			if(!me._inited) {
+				me.init();
+			}
+			me.clear();
+			$('#importDialogNotebookLeanote').html(Api.getMsg('plugin.import_leanote.All'));
+			// 获取所有笔记本
+			me.loadAllNotes();
+			// 隐藏导入单个按钮
+			$('#chooseLeanoteFile').hide();
+			me._curNotebook = null;
+			me._importDialog.modal('show');
+
+		},
+
 		
 		// 打开前要执行的
 		onOpen: function() {
@@ -213,7 +285,19 @@ define(function() {
 		        		me.open(notebook);
 			        };
 			    })()
-		    });
+			});
+			
+			//  添加导入全部笔记
+			Api.addImportAllMenu({
+				label: Api.getMsg('plugin.import_leanote.importLeanote'),
+				click: (function() {
+		        	return function() {
+		        		me.opendir();
+			        };
+			    })()
+			});
+
+
 		},
 		// 打开后
 		onOpenAfter: function() {

@@ -68,6 +68,17 @@ var Import = {
     });
   },
 
+  // notebookId --> 父节点ID，null时为根
+  // dir 需要导入的目录
+  // callback 全局
+  // eachFileCallback是每一个文件的
+  // eachNoteFileCallback是每一个笔记的
+
+  importFromDir: function(notebookId, dir, callback, ) {
+
+  },
+
+
   // 2015-12-12 12:00:00
   parseLeanoteTime: function (str) {
     if (!str || typeof str != 'string' || str.length != '2015-12-12 12:00:00'.length) {
@@ -267,7 +278,7 @@ var Import = {
 
           NotebookId: notebookId,
           Desc: '',
-          NoteId: Common.objectId(),
+          NoteId: note.noteId != undefined ? note.noteId: Common.objectId(), // 指定ID，如果id一样，则更新，或者添加
           IsNew: true
         };
         jsonNote._id = jsonNote.NoteId;

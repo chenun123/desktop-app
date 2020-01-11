@@ -156,6 +156,16 @@ var Api = {
 		var me = this;
 		return me._importMenus;
 	},
+	_importAllMenus: [],
+	addImportAllMenu: function(menu) {
+		var me = this;
+		me._importAllMenus.push(menu);
+	},
+	getImportAllMenus: function(menu) {
+		var me = this;
+		return me._importAllMenus;
+	},
+
 	// 添加用户menu
 	addUserMenu: function(menus, pos) {
 
