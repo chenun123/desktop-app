@@ -16,6 +16,6 @@
   },
   "scripts": {
     "package": "electron-packager ./ leanote --platform=darwin --arch=x64 --out=../leanote --electron-version=4.1.4",
-	"win": "electron-packager.cmd ./ leanote --win --out ../leanote_release --arch=x64 -electron-version=4.2.12"
+	"win": "electron-packager.cmd ./ leanote --win --out ../leanote_release --arch=x64 --electron-version=4.2.12"
   }
 }
