@@ -5,7 +5,7 @@
  */
 define(function() {
 	var importService; //  = nodeRequire('./public/plugins/import_leanote/import');
-	var bookserivce; // = require('notebook')	
+	var bookserivce; // = require('notebook')
 	var leanote = {
 
 		langs: {
@@ -31,7 +31,10 @@ define(function() {
 				"Import file: %s Success!": "文件 %s 导入成功!",
 				"Import file: %s Failure, is leanote file ?": "文件 %s 导入失败! 是Leanote文件?",
 				"Import: %s Success!": "导入笔记: %s 成功!",
-				"All": "所有"
+				"All": "所有",				
+				"%s notes failed!": "失败 %s 个",
+				"Choose Leanote root dir": "选择需要导入文件夹",
+				"UnTitled": "无标题"
 			},
 			'zh-hk': {
 				'importLeanote': '導入Leanote',
@@ -117,6 +120,7 @@ define(function() {
 			var me = this;
 			me._inited = true;
 			bookserivce = require('notebook');
+
 			$('body').append(me._tpl);
 			me._importDialog = $("#importLeanoteDialog");
 
@@ -149,14 +153,22 @@ define(function() {
 						if (!importService) {
 							importService = nodeRequire('./public/plugins/import_leanote/import');
 						}
-
+						
+						var needUpdateNum = {};
 						importService.importFromLeanote(notebookId, paths,
 							// 全局
 							function(ok) {
 								// $('#importLeanoteMsg .curImportFile').html("");
 								// $('#importLeanoteMsg .curImportNote').html("");
+								var keys = [];
+								for (var key in needUpdateNum) {            
+									keys.push(key);
+								}
+
 								setTimeout(function() {
 									$('#importLeanoteMsg .allImport').html(me.getMsg('Done! %s notes imported!', n));
+									importService.flushNoteNumbersNote(keys);
+
 								}, 500);
 							},
 							// 单个文件
@@ -172,7 +184,11 @@ define(function() {
 								if(note) {
 									n++;
 									$('#importLeanoteMsg .curImportNote').html(me.getMsg("Import: %s Success!", note.Title));
-
+									if(note && typeof note == 'object') {
+										if(note.hasOwnProperty('markUpdateNum') && note.markUpdateNum) {
+										  needUpdateNum[note.NotebookId] = 1;
+										}
+									  }									
 									// 不要是新的, 不然切换笔记时又会保存一次
 									note.IsNew = false;
 									
@@ -192,29 +208,50 @@ define(function() {
 				{
 					properties: ['openDirectory'],
 				},
-				function(dir) {
-					if(!dir)
+				function(dirs) {
+					if(!dirs || dirs.length == 0)
 						return;
-					
+					dir = dirs[0];
 					// 获取当前目录所有笔记，并将路径进行拆分
-					
-
-
-
-					// 通过全局笔记判断， 获取到需要更新的 & 添加的笔记
-
-					if(me._curNotebook != null) {
-						console.log("在子菜单中导入" + dir);
-						// 获取当前Notebookid
-						
-						// 获取当前notebook下所有子文件夹
-
-					} else {
-						console.log("全局导入" + dir);
-						// 所有全局所有文件夹
-
-
+					if (!importService) {
+						importService = nodeRequire('./public/plugins/import_leanote/import');
 					}
+					// 异步处理
+
+					importService.importFromDir(me._curNotebook, dir, 
+						function(ok, summary) {
+							//汇总
+							// summary --> {createNotebooks, suc, fail}
+							$('#importLeanoteMsg .allImport').html(me.getMsg('Done! %s notes imported!', "" + summary.suc) + me.getMsg("%s notes failed!", "" + summary.fail));
+
+							// 
+							setTimeout(() => {
+								Note.searchNote();
+							}, 1000);
+
+						},
+						function(ok, filename) {
+							// 处理单个一个文件
+							// if(ok) {
+							// 	$('#importLeanoteMsg .curImportFile').append(me.getMsg("Import file: %s Success!", filename)).append("<br>");
+							// } else {
+							// 	$('#importLeanoteMsg .curImportFile').append(me.getMsg("Import file: %s Failure, is leanote file ?", filename)).append("<br>");
+							// }
+						},
+						function(note) {
+							if(note) {
+								var title = note.Title;
+								if(title == null || title == '')
+									title = me.getMsg("UnTitled");
+								$('#importLeanoteMsg .curImportNote').append(me.getMsg("Import: %s Success!", title)).append("<br>");
+								// 不要是新的, 不然切换笔记时又会保存一次
+								note.IsNew = false;								
+								// 插入到当前笔记中
+								Note.addSync([note]);
+							}
+						}
+					);
+
 				}
 				);
 			});

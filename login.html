@@ -226,11 +226,11 @@ $(function() {
 		(function() {
 			UserService.createLocalUser(username, pwd1, function(ret, dbuser) {
 			if(ret) {
-				setTimeout(function(){
+				//setTimeout(function(){
 					$body.removeClass('loading');
 					goToMainPage();
 					// gui.getCurrentWindow().close();
-				}, 2000);
+				//}, 2000);
 			} else {
 				$body.removeClass('loading');
 				showMsg(getMsg(dbuser));

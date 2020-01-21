@@ -90,6 +90,16 @@ Notebook._updateNotebookNumberNotes = function(notebookId, n) {
     }
 };
 
+Notebook.flushNotebookNumberNotes = function(ids) {
+    var self = this;
+
+    for(var i = 0; i < ids.length; i++) {
+        var notebookId = ids[i];
+        NotebookService.reCountNotebookNumberNotes(notebookId);        
+    }
+    
+};
+
 // addNote, copyNote, moveNote
 Notebook.incrNotebookNumberNotes = function(notebookId) {
     var self = this;

@@ -1527,7 +1527,7 @@ function toLogin() {
 	if(isMac()) {
 		ipc.send('openUrl', {html: 'login.html', width: 278, height: 370, show: true, frame: false, resizable: false })
 	} else {
-		ipc.send('openUrl', {html: 'login.html',  width: 278, height: 400, show: true, frame: true, resizable: false })
+		ipc.send('openUrl', {html: 'login.html',  width: 278, height: 400, show: true, frame: true, resizable: true })
 	}
 	// gui.getCurrentWindow().close();
 }
