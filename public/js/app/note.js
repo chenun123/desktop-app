@@ -3506,6 +3506,34 @@ $(function() {
     });
 
     var linkNotelist = $('#linknoteList');
+    // 防止点击隐藏
+    linkNotelist.click(function(e) {
+        e.stopPropagation();
+    });
+
+
+    $("#linknoteList").on("click", ".view-note", function(e) {
+        console.log("view note");
+        e.stopPropagation();
+        var noteid = $(this).closest('li').data("id");
+        Pjax.changeNotebookAndNote(noteid);
+    });
+
+    $("#linknoteList").on("click", ".link-note", function(e) {
+        console.log("link note");
+        e.stopPropagation();
+        var noteid = $(this).closest('li').data("id");
+        var title = $(this).closest('li').children('.link-title').text()
+        var src = EvtService.getNoteLocalUrl(noteid);
+
+        Note.toggleWriteable();
+        if (LEA.isMarkdownEditor() && MD) {
+            MD.insertLink(src, title);
+        } 
+
+
+    });
+
     // 添加插入日记link
     $('#wmd-note-button').click(function() {
         console.log("choose note to link");
@@ -3515,21 +3543,31 @@ $(function() {
                 return;
             }
 
-            var html = '<ul>';
+            var html = '';
             // 打印所有日记 title, and nodeid
             for (var i = 0; i < notes.length; i++) {
+                //如果与当前编辑ID相同，不添加
+                if(notes[i].NoteId == Note.curNoteId)
+                    continue;
                 console.log(notes[i].Title + " " + notes[i].NoteId);
-                html += '<li id="' + notes[i].NoteId + '">' + notes[i].Title + '</li>';
+                html += '<li class="clear-fix" data-id="' + notes[i].NoteId + '">' + 
+                            '<div class ="link-title">' + (notes[i].Title == undefined || notes[i].Title == ''? getMsg('UnTitle'):notes[i].Title) + '</div>' +                             
+                            '<div class="link-process">' +                         
+                                '<button class="view-note  btn-sm btn-link" title="' + getMsg("view note") + '">' +
+                                    '<span class="fa fa-eye" />' +                        
+                                '</button>' +
+                                '<button class="link-note  btn-sm btn-link btn-default" title="' + getMsg("link note") + '">' + 
+                                    '<span class="fa fa-link" />' +                        
+                                '</button>' + 
+                            '</div>' +
+                        '</li>';
             }
-            html += '</ul';
+            //html += '</ul';
             linkNotelist.html(html);
             // 显示选择框
             $('#noteDropdown').addClass('open');
 
-
             // 插入到编辑器中
-
-
 
         });
 

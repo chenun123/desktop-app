@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -36,13 +35,11 @@
         if (process.platform != 'darwin') {
             document.write('<link rel="stylesheet" href="public/themes/windows.css" type="text/css" />');
         }
-
         function log(o) {
             // console.trace(o);
         }
     </script>
 </head>
-
 <body class="clearfix init">
     <div id="topDrag"></div>
     <div id="topDrag2"></div>
@@ -418,7 +415,7 @@
                                                 <span class="lang">Created</span>: <span class="created-time">2015-04-03</span>
                                                 <span class="lang">Updated</span>: <span class="updated-time">2015-05-01</span>
                                             </div>
-                                            <div class="wmd-button-bar-inner">
+                                            <ul class="wmd-button-bar-inner">
                                                 <ul class="nav left-buttons">
                                                     <li class="wmd-button-group1 btn-group"></li>
                                                 </ul>
@@ -439,21 +436,14 @@
 
                                                 </ul>
 
-                                                <ul class="nav left-buttons">
-
-                                                    <li class="dropdown" id="noteDropdown">
-                                                        <li class="wmd-button-group6 btn-group">
-                                                            <li class="wmd-button btn btn-success" data-toggle="dropdown" id="wmd-note-button" title="Link note" style="left: 0px;"><span style="display: none; background-position: 0px 0px;"></span><i class="fa fa-share-square"></i></li>
-                                                        </li>
-
-                                                        <div class="dropdown-menu" id="noteMenu">
-                                                            <ul id="linknoteList">
-                                                            </ul>
-                                                            <!-- 添加按钮 -->
-                                                        </div>
-                                                    </li>
-
-
+                                                <ul class="nav left-buttons dropdown">
+                                                    <li class="wmd-button-group6 btn-group">
+                                                        <li class="wmd-button btn btn-success dropdown-toggle" data-toggle="dropdown" id="wmd-note-button" title="Link note" style="left: 0px;"><span style="display: none; background-position: 0px 0px;"></span><i class="fa fa-share-square"></i></li>
+                                                    </li>                                                  
+                                                    <ul class="dropdown-menu wmd-mode" id="linknoteMenu">
+                                                        <ul id="linknoteList"></ul>
+                                                    <!-- 添加按钮 -->
+                                                    </ul>
                                                 </ul>
 
 
@@ -726,6 +716,7 @@
 
         <script>
             window.require = window.requireNode;
+
         </script>
         <!-- 升级 -->
         <!-- <script>

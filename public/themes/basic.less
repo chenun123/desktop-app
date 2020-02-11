@@ -825,6 +825,47 @@ h3 {
     }
 }
 
+#linknoteMenu {
+    width: 400px;
+    padding: 10px 5px;
+}
+
+#linknoteList {
+    margin: 0;
+    padding: 0;
+    max-height: 450px;
+    overflow-y: auto;
+    li {
+        display: block;
+        margin: 0;
+        padding: 0 3px;
+        border-radius: 3px;
+        border-bottom: 1px dashed #eee;
+        height: 45px;
+        line-height: 45px;
+        div {
+            float: left;
+        }
+
+
+        .link-title {
+            width: 250px;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        .link-process {
+            float: right;
+            button {
+                padding: 8px;
+                margin-top: 3px;
+            }
+        }
+    }
+}
+
+
+
 //--------
 .animated {
     -webkit-animation-fill-mode: both;

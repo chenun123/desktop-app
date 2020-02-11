@@ -327,7 +327,10 @@
 
     "It will not be synced before fixed.": "该笔记未解决前将不会同步",
     "Sync error": "同步失败",
+    "view note": "查看笔记",
+    "link note":"插入笔记链接到笔记中",
     "Message": "信息",
+    "UnTitle": "无标题",
     "notExists": "服务端笔记不存在",
     "fileUploadError": "图片/附件上传失败",
 

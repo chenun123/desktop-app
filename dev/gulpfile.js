@@ -3,17 +3,19 @@
 var fs = require('fs')
 var path = require('path')
 var gulp = require('gulp')
-var gutil = require('gulp-util')
+var gutil = require('gulp-util');
+var uglify = require('gulp-uglify');
 var less = require('gulp-less');
 var cleanCSS = require('gulp-clean-css');
+var concat = require('gulp-concat');
+var rename = require('gulp-rename');
 
 var styleDir = '../public/themes';
 var styleDir2 = '../public/css';
-
 var jsTinymceDir = '../public/tinymce';
 
 // 解析less
-gulp.task('less', function() {
+gulp.task('less', done => {
     gulp.src(styleDir + '/**/*.less')
         .pipe(less())
         .pipe(cleanCSS({compatibility: 'ie8', processImportFrom: ['!icon/iconfont.css', '!inhope-icon/style.css']}))
@@ -27,6 +29,7 @@ gulp.task('less', function() {
         .pipe(gulp.dest(styleDir2));
 
     gutil.log(gutil.colors.green('less ok'));
+	done();
 });
 
 gulp.task('js', done => {
@@ -59,10 +62,11 @@ gulp.task('js2', done => {
     done();
 });
 
-// 开发服务
-gulp.task('dev', ['less'], function() {
-    gulp.watch(styleDir + '/**/*.less', ['less']);
-    gulp.watch(styleDir2 + '/**/*.less', ['less']);
-});
 
-gulp.task('default', ['dev']);
+// 开发服务
+gulp.task('dev', gulp.series('less', function() {
+    gulp.watch(styleDir + '/**/*.less', gulp.series('less'));
+    gulp.watch(styleDir2 + '/**/*.less', gulp.series('less'));
+}));
+
+gulp.task('default', gulp.parallel('dev', 'js'));
