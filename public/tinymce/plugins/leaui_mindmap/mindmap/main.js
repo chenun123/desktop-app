@@ -46118,8 +46118,8 @@ Minder.Range = kity.createClass('Range',function(){
             return this._updateBoundary();
         },
         updateNativeRange:function(){
-
-            this.nativeRange = this.nativeSel.getRangeAt(0);
+			if(this.nativeSel.rangeCount > 0)
+            	this.nativeRange = this.nativeSel.getRangeAt(0);
             return this;
         },
         clear : function(){

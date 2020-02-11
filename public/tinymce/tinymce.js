@@ -27696,8 +27696,12 @@ define("tinymce/util/Quirks", [
 				// Needs to be the setBaseAndExtend or it will fail to select floated images
 				if (/^(IMG|HR)$/.test(target.nodeName)) {
 					e.preventDefault();
-					selection.getSel().setBaseAndExtent(target, 0, target, 1);
+					selection.getSel().setBaseAndExtent(target, 0, target, 0);
 					editor.nodeChanged();
+					// If not add line below, will not update content
+					// 
+					selection.select(target);
+					//console.log(selection.getContent());
 				}
 
 				if (target.nodeName == 'A' && dom.hasClass(target, 'mce-item-anchor')) {
