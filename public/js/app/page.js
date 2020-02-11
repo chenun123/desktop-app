@@ -324,7 +324,8 @@ Mobile = {
     changeNote: function(noteId) {
         var self = this;
         if (!LEA.isMobile) {
-            return true; }
+            return true;
+        }
         self.toEditor(true, noteId);
         return false;
     },
@@ -356,7 +357,8 @@ Mobile = {
     switchPage: function() {
         var self = this;
         if (!LEA.isMobile || LEA.isIpad) {
-            return true; }
+            return true;
+        }
         if (self.bodyO.hasClass("full-editor")) {
             self.toNormal(true);
         } else {
@@ -618,6 +620,27 @@ $(function() {
         return preHeight < maxHeight ? preHeight : maxHeight;
     }
 
+    function openNote(url) {
+        var reg = new RegExp(EvtService.getNoteLocalUrlPrefix() + '\\?noteId=([0-9a-zA-Z]{24})', 'g');
+        var matches = reg.exec(url);
+        if (matches) {
+            var noteId = matches[1];
+            console.log("touch note -> " + noteId);
+            Pjax.changeNotebookAndNote(noteId);
+        }
+    }
+
+    function openAttach(url) {
+        var reg = new RegExp(EvtService.getAttachLocalUrlPrefix() + '\\?fileId=([0-9a-zA-Z]{24})', 'g');
+        var matches = reg.exec(url);
+        if (matches) {
+            var fileid = matches[1];
+            if (attach_content_var) {
+                attach_content_var.openAttach(fileid);
+            }
+        }
+    }
+
     // 内容下的a点击, 跳转
     $('#editorContent').on('click', 'a', function(e) {
         e.preventDefault();
@@ -625,20 +648,12 @@ $(function() {
             var url = $(this).attr('href');
             if (isOtherSiteUrl(url)) {
                 openExternal(url);
-            }else if (isAttachUrl(url)) {
+            } else if (isAttachUrl(url)) {
                 console.log('click attach ->' + url);
-                (function(k) {
-                    // 打开附件
-                    var reg = new RegExp(EvtService.getAttachLocalUrlPrefix() + '\\?fileId=([0-9a-zA-Z]{24})', 'g');
-                    var matches = reg.exec(k);
-                    if (matches) {
-                        var fileid = matches[1];
-                        if(attach_content_var) {
-                            attach_content_var.openAttach(fileid);
-                        }
-                        
-                    }
-                })(url);       
+                openAttach(url);
+            } else if (isNoteUrl(url)) {
+                console.log('click note ->' + url);
+                openNote(url);
             }
         }
         return false;
@@ -651,21 +666,11 @@ $(function() {
             openExternal(url);
         } else if (isAttachUrl(url)) {
             console.log('click attach ->' + url);
-            (function(k) {
-                // 打开附件
-                var reg = new RegExp(EvtService.getAttachLocalUrlPrefix() + '\\?fileId=([0-9a-zA-Z]{24})', 'g');
-                var matches = reg.exec(k);
-                if (matches) {
-                    var fileid = matches[1];
-                    if(attach_content_var) {
-                        attach_content_var.openAttach(fileid);
-                    }
-                    
-                }
-            })(url);
-
-            
-            
+            openAttach(url);
+        } else if (isNoteUrl(url)) {
+            console.log('click note ->' + url);
+            // 先查找是否存在Note存在，则跳转
+            openNote(url);
         }
 
     });
@@ -709,6 +714,7 @@ var Pjax = {
     changeNotebookAndNote: function(noteId) {
         var note = Note.getNote(noteId);
         if (!note) {
+            alert('Not exist note -> ' + noteId);
             return;
         }
         var isShare = note.Perm != undefined;
@@ -818,8 +824,10 @@ LeaAce = {
             // 本身就有格式的, 防止之前有格式的显示为<span>(ace下)
             var classes = $pre.attr('class') || '';
             var isHtml = classes.indexOf('brush:html') != -1;
-            if ($pre.attr('style')/* ||
-                (!isHtml && $pre.html().indexOf('<style>') != -1)*/) { // 如果是html就不用考虑了, 因为html格式的支持有style
+            if ($pre.attr('style')
+                /* ||
+                                (!isHtml && $pre.html().indexOf('<style>') != -1)*/
+            ) { // 如果是html就不用考虑了, 因为html格式的支持有style
                 $pre.html($pre.text());
             }
             $pre.find('.toggle-raw').remove();
@@ -1360,7 +1368,7 @@ var State = {
             }
             showBody();
             // setTimeout(function() {
-                // showBody();
+            // showBody();
             // }, 100);
         });
         // end
@@ -1515,11 +1523,11 @@ function initPage(initedCallback) {
                 Notebook.renderNotebooks(notebooks);
 
                 // 获得笔记, 一定要在notebooks获取之后
-	            Service.noteService.getNotes('', function(notes) {
-	                Note.renderNotesAndFirstOneContent(notes);
-	                Notebook.selectNotebook($(tt('#notebook [notebookId="?"]', Notebook.allNotebookId)));
-	                ok();
-	            });
+                Service.noteService.getNotes('', function(notes) {
+                    Note.renderNotesAndFirstOneContent(notes);
+                    Notebook.selectNotebook($(tt('#notebook [notebookId="?"]', Notebook.allNotebookId)));
+                    ok();
+                });
             });
 
             // 获取star笔记
@@ -1561,27 +1569,27 @@ function initPage(initedCallback) {
             } else {
                 fullSync(function(err, info) {
                     if (err) {
-                    	if (typeof err == 'object') {
-	                    	if(err['Msg'] == 'NOTLOGIN') {
-	                    		alert(getMsg('You need to sign in Leanote'));
-	                    		toLogin();
-	                    		return;
-							}
-							if(err['Msg'] == 'NEED-UPGRADE-ACCOUNT') {
-								alert(getMsg('You need to upgrade Leanote account'));
-								openExternal('https://leanote.com/pricing#buy');
-								setTimeout(function () {
-		                    		toLogin();
-								}, 1000);
-								return;
-							}
-                    	}
+                        if (typeof err == 'object') {
+                            if (err['Msg'] == 'NOTLOGIN') {
+                                alert(getMsg('You need to sign in Leanote'));
+                                toLogin();
+                                return;
+                            }
+                            if (err['Msg'] == 'NEED-UPGRADE-ACCOUNT') {
+                                alert(getMsg('You need to upgrade Leanote account'));
+                                openExternal('https://leanote.com/pricing#buy');
+                                setTimeout(function() {
+                                    toLogin();
+                                }, 1000);
+                                return;
+                            }
+                        }
 
-                    	if (isMac()) {
-	                        Notify.show({ title: 'Info', body: getMsg('Sync error, retry to sync after 3 seconds') });
-                    	} else {
-                    		alert(getMsg('Sync error, retry to sync after 3 seconds'));
-                    	}
+                        if (isMac()) {
+                            Notify.show({ title: 'Info', body: getMsg('Sync error, retry to sync after 3 seconds') });
+                        } else {
+                            alert(getMsg('Sync error, retry to sync after 3 seconds'));
+                        }
                         setTimeout(function() {
                             reloadApp();
                         }, 3000);
@@ -1996,33 +2004,35 @@ function setMacTopMenu() {
     }, {
         label: 'View',
         submenu: [{
-            label: 'Reload',
-            // 开启开发者模式console时, cmd+r不会走这, 关了还是会走这
-            accelerator: isMac_ ? 'Command+R' : 'Ctrl+R',
-            click: function() {
-                onClose(function() {
-                    gui.win.reload();
-                });
+                label: 'Reload',
+                // 开启开发者模式console时, cmd+r不会走这, 关了还是会走这
+                accelerator: isMac_ ? 'Command+R' : 'Ctrl+R',
+                click: function() {
+                    onClose(function() {
+                        gui.win.reload();
+                    });
+                }
+            }, {
+                label: getMsg('Toggle DevTools'),
+                accelerator: isMac_ ? 'Alt+Command+I' : 'Ctrl+I',
+                click: function() { gui.win.toggleDevTools(); }
             }
-        }, {
-            label: getMsg('Toggle DevTools'),
-            accelerator: isMac_ ? 'Alt+Command+I' : 'Ctrl+I',
-            click: function() { gui.win.toggleDevTools(); }
-        }/*, {
-            type: 'separator'
-        }, {
-            label: Api.getMsg('Snippet View'),
-            // type: "checkbox",
-            click: function() {
-                Note.switchView('snippet');
-            },
-        }, {
-            label: Api.getMsg('List View'),
-            // type: "checkbox",
-            click: function() {
-                Note.switchView('list');
-            },
-        }, */]
+            /*, {
+                        type: 'separator'
+                    }, {
+                        label: Api.getMsg('Snippet View'),
+                        // type: "checkbox",
+                        click: function() {
+                            Note.switchView('snippet');
+                        },
+                    }, {
+                        label: Api.getMsg('List View'),
+                        // type: "checkbox",
+                        click: function() {
+                            Note.switchView('list');
+                        },
+                    }, */
+        ]
     }, {
         label: 'Window',
         submenu: [{
@@ -2117,7 +2127,7 @@ function userMenu(allUsers) {
         setMacTopMenu();
     }
     if (debug) {
-        setTimeout(function () {
+        setTimeout(function() {
             gui.win.toggleDevTools();
         }, 3000)
     }
@@ -2140,14 +2150,14 @@ function userMenu(allUsers) {
 
         var exportAllSubMenus = new gui.Menu();
         var exportAllMenus = Api.getExportAllMenus() || [];
-        for(var i = 0; i < exportAllMenus.length; ++i) {
+        for (var i = 0; i < exportAllMenus.length; ++i) {
             (function(j) {
                 var menu = exportAllMenus[j];
                 var clickBac = menu.click;
 
                 var menuItem = new gui.MenuItem({
                     label: menu.label,
-                    click: function(e) {                        
+                    click: function(e) {
                         clickBac && clickBac();
                     }
                 });
@@ -2160,20 +2170,19 @@ function userMenu(allUsers) {
         this.exportAll = new gui.MenuItem({
             label: getMsg('Export all notes'),
             submenu: exportAllSubMenus,
-            click: function(e) {                
-            }
+            click: function(e) {}
         });
 
         var importAllSubMenus = new gui.Menu();
         var importAllMenus = Api.getImportAllMenus() || [];
-        for(var i = 0; i < importAllMenus.length; ++i) {
+        for (var i = 0; i < importAllMenus.length; ++i) {
             (function(j) {
                 var menu = importAllMenus[j];
                 var clickBac = menu.click;
 
                 var menuItem = new gui.MenuItem({
                     label: menu.label,
-                    click: function(e) {                        
+                    click: function(e) {
                         clickBac && clickBac();
                     }
                 });
@@ -2186,8 +2195,7 @@ function userMenu(allUsers) {
         this.importAll = new gui.MenuItem({
             label: getMsg('Import all notes'),
             submenu: importAllSubMenus,
-            click: function(e) {                
-            }
+            click: function(e) {}
         });
 
         // 注销
@@ -2228,7 +2236,7 @@ function userMenu(allUsers) {
                 checkForUpdates();
             }
         });
-        
+
 
         this.debug = new gui.MenuItem({
             label: getMsg('Toggle DevTools'),

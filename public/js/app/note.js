@@ -135,11 +135,11 @@ Note.notebookHasNotes = function(notebookId) {
 
 // 重新设置sorter, 此时要重新render
 // sortType = dateCreatedASC dateCreatedDESC
-Note.setNotesSorter = function (sortType) {
-	Config.sortType = sortType;
+Note.setNotesSorter = function(sortType) {
+    Config.sortType = sortType;
 
     // 如果当前是tagSearch, search, star 怎么办?
-	// 重新Render
+    // 重新Render
     if (Notebook.isTag || Notebook.isStarred || Notebook.isSearch) {
         Note.renderNotesAndTargetNote(Note._everNotes, false, false);
     } else {
@@ -148,20 +148,20 @@ Note.setNotesSorter = function (sortType) {
     }
     // Note.renderNotesAndTargetNote(Note._everNotes, false, false);
 
-	Api.writeConfig(Config);
+    Api.writeConfig(Config);
 };
 
 // render前先排序
-Note.sortNotes = function (notes) {
-	if (isEmpty(notes)) {
-		return;
-	}
+Note.sortNotes = function(notes) {
+    if (isEmpty(notes)) {
+        return;
+    }
 
-	var sorterAndOrder = Note.getSorterAndOrder();
+    var sorterAndOrder = Note.getSorterAndOrder();
     var sortBy = sorterAndOrder.sortBy;
     var isAsc = sorterAndOrder.isAsc;
 
-	// 排序之
+    // 排序之
     notes.sort(function(a, b) {
         var t1 = a[sortBy];
         var t2 = b[sortBy];
@@ -183,39 +183,39 @@ Note.sortNotes = function (notes) {
     });
 };
 
-Note.getSorterAndOrder = function () {
-	var sortBy = "UpdatedTime";
+Note.getSorterAndOrder = function() {
+    var sortBy = "UpdatedTime";
     var isAsc = false; // 默认是降序
     if (Config.sortType) {
-    	switch(Config.sortType) {
-    		case 'dateCreatedASC':
-    			sortBy = 'CreatedTime';
-    			isAsc = true;
-    			break;
-    		case 'dateCreatedDESC':
-    			sortBy = 'CreatedTime';
-    			isAsc = false;
-    			break;
-    		case 'dateUpdatedASC':
-    			sortBy = 'UpdatedTime';
-    			isAsc = true;
-    			break;
-    		case 'dateUpdatedDESC':
-    			sortBy = 'UpdatedTime';
-    			isAsc = false;
-    			break;
-    		case 'titleASC':
-    			sortBy = 'Title';
-    			isAsc = true;
-    			break;
-    		case 'titleDESC':
-    			sortBy = 'Title';
-    			isAsc = false;
-    			break;
-    	}
+        switch (Config.sortType) {
+            case 'dateCreatedASC':
+                sortBy = 'CreatedTime';
+                isAsc = true;
+                break;
+            case 'dateCreatedDESC':
+                sortBy = 'CreatedTime';
+                isAsc = false;
+                break;
+            case 'dateUpdatedASC':
+                sortBy = 'UpdatedTime';
+                isAsc = true;
+                break;
+            case 'dateUpdatedDESC':
+                sortBy = 'UpdatedTime';
+                isAsc = false;
+                break;
+            case 'titleASC':
+                sortBy = 'Title';
+                isAsc = true;
+                break;
+            case 'titleDESC':
+                sortBy = 'Title';
+                isAsc = false;
+                break;
+        }
     }
-    console.log({sortBy: sortBy, isAsc: isAsc});
-    return {sortBy: sortBy, isAsc: isAsc};
+    console.log({ sortBy: sortBy, isAsc: isAsc });
+    return { sortBy: sortBy, isAsc: isAsc };
 };
 
 // 得到notebook下的notes, 按什么排序 updatedTime?
@@ -233,15 +233,15 @@ Note.getNotesByNotebookId = function(notebookId) {
     }
 
     if (Note.cacheByNotebookId[notebookId][sortBy]) {
-    	if (Note.cacheByNotebookId[notebookId][sortBy][isAsc]) {
-    		return Note.cacheByNotebookId[notebookId][sortBy][isAsc];
-    	}
-    	// 逆序
-    	Note.cacheByNotebookId[notebookId][sortBy][!isAsc].reverse();
-    	var notes = Note.cacheByNotebookId[notebookId][sortBy][!isAsc];
-    	Note.cacheByNotebookId[notebookId][sortBy][!isAsc] = null;
-    	Note.cacheByNotebookId[notebookId][sortBy][isAsc] = notes;
-    	return notes;
+        if (Note.cacheByNotebookId[notebookId][sortBy][isAsc]) {
+            return Note.cacheByNotebookId[notebookId][sortBy][isAsc];
+        }
+        // 逆序
+        Note.cacheByNotebookId[notebookId][sortBy][!isAsc].reverse();
+        var notes = Note.cacheByNotebookId[notebookId][sortBy][!isAsc];
+        Note.cacheByNotebookId[notebookId][sortBy][!isAsc] = null;
+        Note.cacheByNotebookId[notebookId][sortBy][isAsc] = notes;
+        return notes;
     }
 
     // 从所有的notes中找到notebookId的, 并排序之
@@ -518,7 +518,7 @@ Note.getImgSrc = function(content) {
         var imgs = $(content).find("img");
         for (var i in imgs) {
             var src = imgs.eq(i).attr("src");
-            if(src && src.indexOf('data:image') < 0) { // 不是base64数据
+            if (src && src.indexOf('data:image') < 0) { // 不是base64数据
                 return src;
             }
         }
@@ -1065,7 +1065,7 @@ Note.renderNotes = function(notes, forNewNote, hasSorted) {
 
     // 重新排序
     if (!hasSorted) {
-	    Note.sortNotes(notes);
+        Note.sortNotes(notes);
     }
 
     // 20个一次
@@ -1354,8 +1354,8 @@ Note.unConnected = function() {
 Note.connected = function() {
     var me = this;
     if (me._syncWarningE.data('reason') == 'unConnected') {
-    	me._syncWarningE.data('reason', '-');
-    	me._syncWarningE.hide();
+        me._syncWarningE.data('reason', '-');
+        me._syncWarningE.hide();
     }
 };
 Note.notLogin = function() {
@@ -2587,8 +2587,8 @@ var Attach = {
             var attachId = $(this).closest('li').data("id");
             var t = this;
             self.viewAttach(attachId);
-                // $(t).button("reset");
-            
+            // $(t).button("reset");
+
         });
         // 删除
         self.attachListO.on("click", ".delete-attach", function(e) {
@@ -2803,7 +2803,7 @@ var Attach = {
     },
     // 查看
     viewAttach: function(attachId) {
-        if(attach_content_var) {
+        if (attach_content_var) {
             attach_content_var.openAttach(attachId);
         }
 
@@ -3265,12 +3265,15 @@ Note.batch = {
     }
 };
 
+
 //------------------- 事件
 $(function() {
     // 附件初始化
     Attach.init();
 
     Note.batch.init();
+
+
 
     //------------------
     // 新建笔记
@@ -3323,13 +3326,13 @@ $(function() {
                 Note.switchView('list');
             }
         }));
-        noteViewMenus.append(new gui.MenuItem({type: "separator"}));
+        noteViewMenus.append(new gui.MenuItem({ type: "separator" }));
         noteViewMenus.append(new gui.MenuItem({
             checked: Config.sortType == "dateCreatedASC",
             label: Api.getMsg("Date Created - ASC"),
             type: "checkbox",
             click: function() {
-            	Note.setNotesSorter('dateCreatedASC');
+                Note.setNotesSorter('dateCreatedASC');
             }
         }));
         noteViewMenus.append(new gui.MenuItem({
@@ -3337,16 +3340,16 @@ $(function() {
             label: Api.getMsg("Date Created - DESC"),
             type: "checkbox",
             click: function() {
-            	Note.setNotesSorter('dateCreatedDESC');
+                Note.setNotesSorter('dateCreatedDESC');
             }
         }));
-        noteViewMenus.append(new gui.MenuItem({type: "separator"}));
+        noteViewMenus.append(new gui.MenuItem({ type: "separator" }));
         noteViewMenus.append(new gui.MenuItem({
             checked: Config.sortType == "dateUpdatedASC",
             label: Api.getMsg("Date Updated - ASC"),
             type: "checkbox",
             click: function() {
-            	Note.setNotesSorter('dateUpdatedASC');
+                Note.setNotesSorter('dateUpdatedASC');
             }
         }));
         noteViewMenus.append(new gui.MenuItem({
@@ -3354,16 +3357,16 @@ $(function() {
             label: Api.getMsg("Date Updated - DESC"),
             type: "checkbox",
             click: function() {
-            	Note.setNotesSorter('dateUpdatedDESC');
+                Note.setNotesSorter('dateUpdatedDESC');
             }
         }));
-        noteViewMenus.append(new gui.MenuItem({type: "separator"}));
+        noteViewMenus.append(new gui.MenuItem({ type: "separator" }));
         noteViewMenus.append(new gui.MenuItem({
             checked: Config.sortType == "titleASC",
             label: Api.getMsg("Title - ASC"),
             type: "checkbox",
             click: function() {
-            	Note.setNotesSorter('titleASC');
+                Note.setNotesSorter('titleASC');
             }
         }));
         noteViewMenus.append(new gui.MenuItem({
@@ -3371,7 +3374,7 @@ $(function() {
             label: Api.getMsg("Title - DESC"),
             type: "checkbox",
             click: function() {
-            	Note.setNotesSorter('titleDESC');
+                Note.setNotesSorter('titleDESC');
             }
         }));
 
@@ -3500,6 +3503,36 @@ $(function() {
             Note.toggleWriteable();
             e.preventDefault();
         }
+    });
+
+    var linkNotelist = $('#linknoteList');
+    // 添加插入日记link
+    $('#wmd-note-button').click(function() {
+        console.log("choose note to link");
+        linkNotelist.html('');
+        NoteService.getNotes('', function(notes) {
+            if (!notes) {
+                return;
+            }
+
+            var html = '<ul>';
+            // 打印所有日记 title, and nodeid
+            for (var i = 0; i < notes.length; i++) {
+                console.log(notes[i].Title + " " + notes[i].NoteId);
+                html += '<li id="' + notes[i].NoteId + '">' + notes[i].Title + '</li>';
+            }
+            html += '</ul';
+            linkNotelist.html(html);
+            // 显示选择框
+            $('#noteDropdown').addClass('open');
+
+
+            // 插入到编辑器中
+
+
+
+        });
+
     });
 
 });
