@@ -1,3 +1,4 @@
+
 // 本地api集成
 function isURL(str_url) {
     var re = new RegExp("^((https|http|ftp|rtsp|mms|emailto)://).+");
@@ -117,6 +118,28 @@ function Menu() {
             	alert(getMsg('Error'));
             	return;
             }
+
+            // 判断src是链接还是数据
+            if(src.indexOf("data:") >= 0) {
+                // 将数据cp
+                var name = "Untitled" + FileService.getBase64ImageExt(src);
+                // 获取后缀
+                gui.dialog.showSaveDialog(gui.getCurrentWindow(), {title: name, defaultPath: gui.app.getPath('userDesktop') + '/' + name}, function(targetPath) {
+                    if(targetPath) {
+                        // 将数据cp, 将bas64图片保存
+                        FileService.saveImage(src, targetPath, function(ok, msg) {
+                            if(ok) {
+                                Notify.show({title: 'Info', body: 'Image saved successful!'});
+                            } else {
+                                Notify.show({type: 'warning', title: 'Warning', body: 'Image saved failed!'});
+                            }
+                        });                        
+                    }
+                });
+                return;
+            } 
+
+
             // 得到图片, 打开dialog
             FileService.downloadImg(src, function(curPath) {
             	if(curPath) {
