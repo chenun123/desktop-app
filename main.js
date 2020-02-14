@@ -196,7 +196,10 @@ function openIt() {
       width: 1050, 
       height: 595, 
       frame: process.platform != 'darwin', 
-      transparent: false
+      transparent: false,
+      webPreferences:{
+        nodeIntegration: true
+      }
     }
   );
 
@@ -225,6 +228,12 @@ function openIt() {
 
     var html = arg.html;
     var everWindow = mainWindow;
+    /*
+          webPreferences:{
+        nodeIntegration: true
+      }
+    */
+    arg['webPreferences'] = {'nodeIntegration': true};
     var win2 = new BrowserWindow(arg);
     win2.loadURL('file://' + __dirname + '/' + html);
     mainWindow = win2;
