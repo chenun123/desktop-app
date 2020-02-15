@@ -190,7 +190,8 @@ function openIt() {
   // 协议
   var leanoteProtocol = require('leanote_protocol');
   leanoteProtocol.init();
-
+  const Menu = electron.Menu;
+  Menu.setApplicationMenu(null);
   // Create the browser window.
   mainWindow = new BrowserWindow({
       width: 1050, 
