@@ -131,7 +131,61 @@ define(function() {
 
 			// 导入, 选择文件
 			$('#chooseLeanoteFile').click(function() {
+				var importFunc = function(paths) {
+					var notebookId = me._curNotebook.NotebookId;
 
+					var n = 0;
+
+					me.clear();
+
+					if (!importService) {
+						importService = nodeRequire('./public/plugins/import_leanote/import');
+					}
+					
+					var needUpdateNum = {};
+					importService.importFromLeanote(notebookId, paths,
+						// 全局
+						function(ok) {
+							// $('#importLeanoteMsg .curImportFile').html("");
+							// $('#importLeanoteMsg .curImportNote').html("");
+							var keys = [];
+							for (var key in needUpdateNum) {            
+								keys.push(key);
+							}
+
+							setTimeout(function() {
+								$('#importLeanoteMsg .allImport').html(me.getMsg('Done! %s notes imported!', n));
+								importService.flushNoteNumbersNote(keys);
+
+							}, 500);
+						},
+						// 单个文件
+						function(ok, filename) {
+							if(ok) {
+								$('#importLeanoteMsg .curImportFile').html(me.getMsg("Import file: %s Success!", filename));
+							} else {
+								$('#importLeanoteMsg .curImportFile').html(me.getMsg("Import file: %s Failure, is leanote file ?", filename));
+							}
+						},
+						// 单个笔记
+						function(note) {
+							if(note) {
+								n++;
+								$('#importLeanoteMsg .curImportNote').html(me.getMsg("Import: %s Success!", note.Title));
+								if(note && typeof note == 'object') {
+									if(note.hasOwnProperty('markUpdateNum') && note.markUpdateNum) {
+									  needUpdateNum[note.NotebookId] = 1;
+									}
+								  }									
+								// 不要是新的, 不然切换笔记时又会保存一次
+								note.IsNew = false;
+								
+								// 插入到当前笔记中
+								Note.addSync([note]);
+							}
+						}
+					);
+				};
 				Api.gui.dialog.showOpenDialog(Api.gui.getCurrentWindow(), 
 					{
 						properties: ['openFile', 'multiSelections'],
@@ -140,78 +194,27 @@ define(function() {
 						]
 					},
 					function(paths) {
+						//旧版本调用 
 						if(!paths) {
 							return;
 						}
-
-						var notebookId = me._curNotebook.NotebookId;
-
-						var n = 0;
-
-						me.clear();
-
-						if (!importService) {
-							importService = nodeRequire('./public/plugins/import_leanote/import');
-						}
-						
-						var needUpdateNum = {};
-						importService.importFromLeanote(notebookId, paths,
-							// 全局
-							function(ok) {
-								// $('#importLeanoteMsg .curImportFile').html("");
-								// $('#importLeanoteMsg .curImportNote').html("");
-								var keys = [];
-								for (var key in needUpdateNum) {            
-									keys.push(key);
-								}
-
-								setTimeout(function() {
-									$('#importLeanoteMsg .allImport').html(me.getMsg('Done! %s notes imported!', n));
-									importService.flushNoteNumbersNote(keys);
-
-								}, 500);
-							},
-							// 单个文件
-							function(ok, filename) {
-								if(ok) {
-									$('#importLeanoteMsg .curImportFile').html(me.getMsg("Import file: %s Success!", filename));
-								} else {
-									$('#importLeanoteMsg .curImportFile').html(me.getMsg("Import file: %s Failure, is leanote file ?", filename));
-								}
-							},
-							// 单个笔记
-							function(note) {
-								if(note) {
-									n++;
-									$('#importLeanoteMsg .curImportNote').html(me.getMsg("Import: %s Success!", note.Title));
-									if(note && typeof note == 'object') {
-										if(note.hasOwnProperty('markUpdateNum') && note.markUpdateNum) {
-										  needUpdateNum[note.NotebookId] = 1;
-										}
-									  }									
-									// 不要是新的, 不然切换笔记时又会保存一次
-									note.IsNew = false;
-									
-									// 插入到当前笔记中
-									Note.addSync([note]);
-								}
-							}
-						);
+						importFunc(paths);
 					}
-				);
+				).then( result => {
+					var paths = result.filePaths;
+					if(!paths) {
+						return;
+					}
+					importFunc(paths);
+				}).catch(result => {
+					console.log(result);
+				});
 
 			});
 
 			$('#chooseLeanoteDir').click(function(){
-				// 点击
-				Api.gui.dialog.showOpenDialog(Api.gui.getCurrentWindow(),
-				{
-					properties: ['openDirectory'],
-				},
-				function(dirs) {
-					if(!dirs || dirs.length == 0)
-						return;
-					dir = dirs[0];
+				var importFunc = function(paths) {
+					dir = paths[0];
 					// 获取当前目录所有笔记，并将路径进行拆分
 					if (!importService) {
 						importService = nodeRequire('./public/plugins/import_leanote/import');
@@ -251,9 +254,28 @@ define(function() {
 							}
 						}
 					);
-
+				};
+				
+				// 点击
+				Api.gui.dialog.showOpenDialog(Api.gui.getCurrentWindow(),
+				{
+					properties: ['openDirectory'],
+				},
+				function(dirs) {
+					if(!dirs || dirs.length == 0)
+						return;
+					// 旧版本调用 
+					importFunc(dirs);					
 				}
-				);
+				).then( result => {
+					var paths = result.filePaths;
+					if(!paths) {
+						return;
+					}
+					importFunc(paths);
+				}).catch(result => {
+					console.log(result);
+				});
 			});
 
 		},

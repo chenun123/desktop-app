@@ -524,10 +524,11 @@ function insertLocalImage() {
             ]
         },
         function(paths) {
+            // 旧版本调用 
             if (!paths) {
                 return;
             }
-
+    
             for (var i = 0; i < paths.length; ++i) {
                 (function(k) {
                     var imagePath = paths[k];
@@ -550,7 +551,38 @@ function insertLocalImage() {
                 })(i);
             }
         }
-    );
+
+    ).then( result => {
+        var paths = result.filePaths;
+        if (!paths) {
+            return;
+        }
+
+        for (var i = 0; i < paths.length; ++i) {
+            (function(k) {
+                var imagePath = paths[k];
+                // var imagePath = file.path;
+                // 上传之
+                FileService.uploadImage(imagePath, function(newImage, msg) {
+                    if (newImage) {
+                        var note = Note.getCurNote();
+                        var url = EvtService.getImageLocalUrl(newImage.FileId);
+                        if (!note.IsMarkdown) {
+                            tinymce.activeEditor.insertContent('<img src="' + url + '">');
+                        } else {
+                            // TODO markdown insert Image
+                            MD.insertLink(url, '', true);
+                        }
+                    } else {
+                        alert(msg || "error");
+                    }
+                });
+            })(i);
+        }
+        
+    }).catch(result => {
+        console.log(result);
+    });
 }
 
 // 插入图片(链接)

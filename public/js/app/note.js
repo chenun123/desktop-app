@@ -2650,23 +2650,42 @@ var Attach = {
                     properties: ['openFile', 'multiSelections']
                 },
                 function(paths) {
+                    // 旧版本调用
                     if (!paths) {
                         return;
                     }
-
                     // 如果是新建的笔记, 必须先保存note
                     var note = Note.getCurNote();
                     if (note && note.IsNew) {
                         Note.curChangedSaveIt(true);
                     }
-
+    
                     FileService.addAttach(paths, Note.curNoteId, function(files) {
                         if (files) {
                             me.addAttachs(files);
                         }
                     });
                 }
-            );
+            ).then( result => {
+                var paths = result.filePaths;
+                if (!paths) {
+                    return;
+                }
+                // 如果是新建的笔记, 必须先保存note
+                var note = Note.getCurNote();
+                if (note && note.IsNew) {
+                    Note.curChangedSaveIt(true);
+                }
+
+                FileService.addAttach(paths, Note.curNoteId, function(files) {
+                    if (files) {
+                        me.addAttachs(files);
+                    }
+                });
+            }).catch(result => {
+                console.log(result);
+            });
+
         });
     },
     attachListO: $("#attachList"),

@@ -162,9 +162,18 @@ define(function() {
                     properties: ['openDirectory']
                 },
                 function(targetPath) {
+                    // 旧版本调用 
                     callback(targetPath);
                 }
-            );
+            ).then( result => {
+				var paths = result.filePaths;
+				if(!paths || paths.length == 0) {
+					return;
+				}
+				callback(paths[0]);	
+			}).catch(result => {
+				console.log(result);
+			});
         },
 
         loadingIsClosed: false,

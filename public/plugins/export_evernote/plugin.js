@@ -413,7 +413,15 @@ define(function() {
 				function(targetPath) {
 					callback(targetPath);
 				}
-			);
+			).then( result => {
+				var paths = result.filePaths;
+				if(!paths || paths.length == 0) {
+					return;
+				}
+				callback(paths[0]);	
+			}).catch(result => {
+				console.log(result);
+			});
 		},
 
 		loadingIsClosed: false,
