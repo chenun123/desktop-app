@@ -307,7 +307,7 @@ define(function() {
 
 			var allMatchs = allImages.concat(allAttachs);
 
-			if (allMatchs.length == 0 || !note.Attachs || note.Attachs.length == 0) {
+			if (allMatchs.length == 0) {
 				callback(content, []);
 				return;
 			}
@@ -690,13 +690,13 @@ define(function() {
 			}, 100);
 
 			var name = note.Title ? note.Title + '.leanote' : getMsg('Untitled') + '.leanote';
-			//name = me.fixFilename(name);
+			name = me.fixFilename(name);
 
 			var targetPath = path + Api.commonService.getPathSep() + name;
 
 			// 将路径和名字区分开
 			var pathInfo = Api.commonService.splitFile(targetPath);
-			//pathInfo.nameNotExt = me.fixFilename(pathInfo.nameNotExt); // 重新修正一次
+			pathInfo.nameNotExt = me.fixFilename(pathInfo.nameNotExt); // 重新修正一次
 			var nameNotExt = pathInfo.nameNotExt;
 			pathInfo.nameNotExtRaw = pathInfo.nameNotExt;
 
