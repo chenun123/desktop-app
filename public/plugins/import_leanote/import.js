@@ -365,10 +365,28 @@ var Import = {
         // 下一个
         matches = reg.exec(content);
       }
+      // image with img
+      reg = new RegExp('<img([^>]*?)src=["\']?leanote://file/getImage\\?fileId=([0-9a-zA-Z]{24})["\']?(.*?)>', 'g');
+      matches = reg.exec(content);
+      while (matches) {
+        var all = matches[0];
+        var pre = matches[1]; // img与src之间
+        var fileId = matches[2];
+        var back = matches[3]; // src与>之间
+        allMatchs.push({
+          fileId: fileId,
+          pre: pre,
+          back: back,
+          all: all,
+          imgStyle: true
+        });
+        // 下一个
+        matches = reg.exec(content);
+      }
 
       // attach
-      var reg = new RegExp('\\[([^\\]]*?)\\]\\(leanote://file/getAttach\\?fileId=([0-9a-zA-Z]{24})\\)', 'g');
-      var matches = reg.exec(content);
+      reg = new RegExp('\\[([^\\]]*?)\\]\\(leanote://file/getAttach\\?fileId=([0-9a-zA-Z]{24})\\)', 'g');
+      matches = reg.exec(content);
       // 先找到所有的
       while (matches) {
         var all = matches[0];
@@ -440,10 +458,16 @@ var Import = {
       }
       else {
         if (note.isMarkdown) {
-          if (!eachMatch.isAttach) {
-            // 用新的FileId
-            var href = Api.evtService.getImageLocalUrl(fileInfo.FileId);
-            link = '![' + eachMatch.title + '](' + href + ')';
+          if (!eachMatch.isAttach) {            
+            if(eachMatch.imgStyle) {
+              var href = Api.evtService.getImageLocalUrl(fileInfo.FileId);
+              link = '<img ' + eachMatch.pre + 'src="' + href + '"' + eachMatch.back + '>';
+            } else {
+              // 用新的FileId
+              var href = Api.evtService.getImageLocalUrl(fileInfo.FileId);
+              link = '![' + eachMatch.title + '](' + href + ')';
+            }
+            
           }
           else {
             var href = Api.evtService.getAttachLocalUrl(fileInfo.FileId);
@@ -514,7 +538,7 @@ var Import = {
         // 添加到数据库中
         var jsonNote = {
           Title: note.title,
-          Content: me.fixContent(note.content),
+          Content: note.content,//me.fixContent(note.content), // 對于leanote，不再進行修復
           Tags: note.tags || [],
           CreatedTime: me.parseLeanoteTime(note.createdTime),
           UpdatedTime: me.parseLeanoteTime(note.updatedTime),
