@@ -548,6 +548,7 @@ var Import = {
 
           NotebookId: notebookId,
           Desc: '',
+          ImgSrc: '', // Desc, ImgSrc 清空，当数据改变时，会自动重新获取
           NoteId: note.noteId != undefined ? note.noteId : Common.objectId(), // 指定ID，如果id一样，则更新，或者添加
           IsNew: true
         };
