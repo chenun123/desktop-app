@@ -1,13 +1,30 @@
 # Leanote Desktop App
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/leanote/desktop-app?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+## Description
+Fork from https://github.com/leanote/desktop-app, I only modify leanote with local mode, not test with server.
+
+## Change List
+
+- Turn on local mode, and fix the bug of blank screen when creating accout with it.
+- Add view mode for attach file and link with 'leanote:' pre. Support pdf, many source type, c,c++,java,etc.
+- Fix the bug of mind map, after insert mind map, you can edit when click it.
+- Add Link note for markdown and mce editor, can insert a local leanote link very simple. Support search note with key word, but only support search title and content, tag not supported for now.
+- Add export all notes with pdf and leanote format
+- Add import leanote notes with root notebook, and support import with dir.
+- Add support for hign version of nodejs，electron (bigger than 4.0.0, such as 8.0.0) and gulp, fix the blank screen when editing the mind map.
+- Not show sync flag with local mode.
+- Fix the image bug of base64 encoded, can not be save as ..
+- Fix import and export note bug, the img tag with local image not correct processed.
+- Fix the view image not found bug when importing same note id.
+- Fix some theme bug, such as not show correct with some mode or platform.
 
 Use Electron(atom-shell) to create leanote desktop app.
 
 ![preview.png](preview.png "")
 
 ## Download
-Please see http://app.leanote.com
+Orgin project, please see http://app.leanote.com
+
 
 ## How to develop it
 
@@ -29,6 +46,12 @@ $> gulp dev
 # 2. run with electron
 $> cd PATH-TO-LEANOTE-DESKTOP-APP
 $> electron .
+```
+
+### 3. Packet it with electron-packager
+
+```
+$> electron-packager ./ leanote --out=../leanote --electron-version=8.0.0
 ```
 
 ## Docs
