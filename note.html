@@ -362,9 +362,13 @@
                             <!-- 编辑器 -->
                             <div id="mceToolbar">
                                 <div id="mceToolbarContainer">
-                                    <div id="popularToolbar" style="position: absolute; right: 30px; left: 0"></div>
+                                    <div id="popularToolbar" style="position: absolute; right: 60px; left: 0"></div>
                                     <a id="moreBtn">
                                         <i class="more-fa fa fa-angle-down"></i>
+                                    </a>
+
+                                    <a id="linkBtn" class="lang-title dropdown-toggle" title="Link Note">
+                                        <i class="fa fa-share-square"></i>
                                     </a>
                                 </div>
 
@@ -374,6 +378,18 @@
                                     <span class="lang">Created</span>: <span class="created-time">2015-04-03</span>
                                     <span class="lang">Updated</span>: <span class="updated-time">2015-05-01</span>
                                 </div>
+                            </div>
+                            
+                            <div class="nav left-buttons dropdown" id="mce_linknoe_container">
+                                <ul class="dropdown-toggle" data-toggle="dropdown"></ul>
+                                <ul class="dropdown-menu wmd-mode" id="mce_linknoteMenu">
+                                    <ul id="mce_linknotesearchWrap">
+                                       <input type="text" class="search-text lang-placeholder" placeholder="Search notebook" id="mce_linknoteSearchContent">
+                                       <button title="search" id="mce_linknoteSearch" class="lang-title lang search-button">search</button>
+                                    </ul>
+                                    <ul id="mce_linknoteList"></ul>
+                                <!-- 添加按钮 -->
+                                </ul>
                             </div>
 
                             <div class="editorBg"></div>
@@ -438,9 +454,13 @@
 
                                                 <ul class="nav left-buttons dropdown">
                                                     <li class="wmd-button-group6 btn-group">
-                                                        <li class="wmd-button btn btn-success dropdown-toggle" data-toggle="dropdown" id="wmd-note-button" title="Link note" style="left: 0px;"><span style="display: none; background-position: 0px 0px;"></span><i class="fa fa-share-square"></i></li>
+                                                        <li class="wmd-button btn btn-success dropdown-toggle" data-toggle="dropdown" id="wmd-note-button" title="Link Note" style="left: 0px;"><span style="display: none; background-position: 0px 0px;"></span><i class="fa fa-share-square"></i></li>
                                                     </li>                                                  
                                                     <ul class="dropdown-menu wmd-mode" id="linknoteMenu">
+                                                        <ul id="linknotesearchWrap">
+                                                           <input type="text" class="search-text lang-placeholder" placeholder="Search notebook" id="linknoteSearchContent">
+                                                           <button title="search" id="linknoteSearch" class="lang-title lang search-button">search</button>
+                                                        </ul>
                                                         <ul id="linknoteList"></ul>
                                                     <!-- 添加按钮 -->
                                                     </ul>

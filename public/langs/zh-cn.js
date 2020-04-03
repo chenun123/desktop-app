@@ -140,7 +140,7 @@
     "shareInfo": "你也可以将知识分享给你的好友.",
     "shareToFriends": "分享给好友",
     "simple": "简约",
-    
+    "Link Note": "引用笔记",
     "submit": "提交",
     "suggestions": "建议",
     "suggestionsInfo": "帮助我们完善leanote",

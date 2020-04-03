@@ -3524,12 +3524,90 @@ $(function() {
         }
     });
 
+    var linkNoteSearchButton = $('#linknoteSearch');
+
+    $("#linknotesearchWrap").click(function(e) {
+        e.stopPropagation();
+    });
+
     var linkNotelist = $('#linknoteList');
+    var mce_linkNotelist = $('#mce_linknoteList');
     // 防止点击隐藏
     linkNotelist.click(function(e) {
         e.stopPropagation();
     });
 
+
+    var searchNotes = function(search, isOpen, isMd) {        
+        if(isMd)
+            linkNotelist.html('');
+        else 
+            mce_linkNotelist.html('');
+        NoteService.searchNote(search, function(notes) {
+            if (!notes) {
+                return;
+            }
+
+            var html = '';
+            // 打印所有日记 title, and nodeid
+            for (var i = 0; i < notes.length; i++) {
+                //如果与当前编辑ID相同，不添加
+                if(notes[i].NoteId == Note.curNoteId)
+                    continue;
+                //console.log(notes[i].Title + " " + notes[i].NoteId);
+                html += '<li class="clear-fix" data-id="' + notes[i].NoteId + '">' + 
+                            '<div class ="link-title">' + (notes[i].Title == undefined || notes[i].Title == ''? getMsg('UnTitle'):notes[i].Title) + '</div>' +                             
+                            '<div class="link-process">' +                         
+                                '<button class="view-note  btn-sm btn-link" title="' + getMsg("view note") + '">' +
+                                    '<span class="fa fa-eye" />' +                        
+                                '</button>' +
+                                '<button class="link-note  btn-sm btn-link btn-default" title="' + getMsg("link note") + '">' + 
+                                    '<span class="fa fa-link" />' +                        
+                                '</button>' + 
+                            '</div>' +
+                        '</li>';
+            }
+            //html += '</ul';
+            if(isMd)
+                linkNotelist.html(html);
+            else 
+                mce_linkNotelist.html(html);
+            // 显示选择框
+            // if(!isOpen) {
+            //     $('#noteDropdown').addClass('open');
+            // }                
+        });
+    }
+
+    // $("#linknotesearchWrap").on('change', '#linknoteSearchContent', function(e) {
+    //     console.log("on search ..");
+    //     var text = $("#linknoteSearchContent").val();
+    //     searchNotes(text, true, true);
+    // });
+
+    // 实时监控
+    $('#linknoteSearchContent').bind('input propertychange', function(){
+        console.log("on search change ....");
+        var text = $("#linknoteSearchContent").val();
+        searchNotes(text, true, true);
+    });
+
+    $("#linknoteSearchContent").on("keydown", function(e) {
+        var theEvent = e; // window.event || arguments.callee.caller.arguments[0];
+        // 13 -> left enter, 108 -> number board enter
+        if (theEvent.keyCode == 13 || theEvent.keyCode == 108) {
+            theEvent.preventDefault();
+            var text = $("#linknoteSearchContent").val();
+            searchNotes(text, true, true);
+            return false;
+        }
+    });
+
+    linkNoteSearchButton.click(function(e) {
+        // 搜索
+        var text = $("#linknoteSearchContent").val();
+        searchNotes(text, true, true);
+    });
 
     $("#linknoteList").on("click", ".view-note", function(e) {
         console.log("view note");
@@ -3556,41 +3634,75 @@ $(function() {
     // 添加插入日记link
     $('#wmd-note-button').click(function() {
         console.log("choose note to link");
-        linkNotelist.html('');
-        NoteService.getNotes('', function(notes) {
-            if (!notes) {
-                return;
-            }
-
-            var html = '';
-            // 打印所有日记 title, and nodeid
-            for (var i = 0; i < notes.length; i++) {
-                //如果与当前编辑ID相同，不添加
-                if(notes[i].NoteId == Note.curNoteId)
-                    continue;
-                console.log(notes[i].Title + " " + notes[i].NoteId);
-                html += '<li class="clear-fix" data-id="' + notes[i].NoteId + '">' + 
-                            '<div class ="link-title">' + (notes[i].Title == undefined || notes[i].Title == ''? getMsg('UnTitle'):notes[i].Title) + '</div>' +                             
-                            '<div class="link-process">' +                         
-                                '<button class="view-note  btn-sm btn-link" title="' + getMsg("view note") + '">' +
-                                    '<span class="fa fa-eye" />' +                        
-                                '</button>' +
-                                '<button class="link-note  btn-sm btn-link btn-default" title="' + getMsg("link note") + '">' + 
-                                    '<span class="fa fa-link" />' +                        
-                                '</button>' + 
-                            '</div>' +
-                        '</li>';
-            }
-            //html += '</ul';
-            linkNotelist.html(html);
-            // 显示选择框
-            $('#noteDropdown').addClass('open');
-
-            // 插入到编辑器中
-
-        });
+        // 清除
+        $("#linknoteSearchContent").val('');
+        // 搜索
+        searchNotes('', false, true);
 
     });
+
+    /// MCE link note  begin 
+    // mce toggle link note btn
+    $('#linkBtn').click(function() {
+        $('#mce_linknoe_container').addClass('open');
+        searchNotes('', false, false);
+        return false;
+    });
+
+
+    $("#mce_linknotesearchWrap").click(function(e) {
+        e.stopPropagation();
+    });
+    
+    // 防止点击隐藏
+    $('#mce_linknoteList').click(function(e) {
+        e.stopPropagation();
+    });
+
+    $('#mce_linknoteSearchContent').bind('input propertychange', function(){
+        console.log("on search change ....");
+        var text = $("#mce_linknoteSearchContent").val();
+        searchNotes(text, true, false);
+    });
+
+    $("#mce_linknoteSearchContent").on("keydown", function(e) {
+        var theEvent = e; // window.event || arguments.callee.caller.arguments[0];
+        // 13 -> left enter, 108 -> number board enter
+        if (theEvent.keyCode == 13 || theEvent.keyCode == 108) {
+            theEvent.preventDefault();
+            var text = $("#mce_linknoteSearchContent").val();
+            searchNotes(text, true, false);
+            return false;
+        }
+    });
+
+    $('#mce_linknoteSearch').click(function(e) {
+        // 搜索
+        var text = $("#mce_linknoteSearchContent").val();
+        searchNotes(text, true, false);
+    });
+
+    $("#mce_linknoteList").on("click", ".view-note", function(e) {
+        console.log("view note");
+        e.stopPropagation();
+        var noteid = $(this).closest('li').data("id");
+        Pjax.changeNotebookAndNote(noteid);
+    });
+
+    $("#mce_linknoteList").on("click", ".link-note", function(e) {
+        console.log("link note");
+        e.stopPropagation();
+        var noteid = $(this).closest('li').data("id");
+        var title = $(this).closest('li').children('.link-title').text()
+        var src = EvtService.getNoteLocalUrl(noteid);
+
+        Note.toggleWriteable();
+        if (!LEA.isMarkdownEditor() && tinymce) {            
+            tinymce.activeEditor.insertContent('<a target="_blank" href="' + src + '">' + title + '</a>');
+        }
+    });
+
+    /// MCE link node end
 
 });
 
