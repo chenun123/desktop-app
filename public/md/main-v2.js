@@ -8713,6 +8713,8 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
         undo: getMsg("Undo") + " -",
         redo: getMsg("Redo") + " -",
         
+        tb: getMsg("Table") + "<tb>",
+
         help: "Markdown Editing Help"
     };
     
@@ -8757,6 +8759,10 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
             win: 'Ctrl-R',
             mac: 'Command-R|Ctrl-R',
         },
+        tb: {
+            win: 'Ctrl-M',
+            mac: 'Command-T|Ctrl-M'
+        },
         undo: {
             win: 'Ctrl-Z',
             mac: 'Command-Z',
@@ -8779,6 +8785,7 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
     // links.
     var imageDefaultText = "http://";
     var linkDefaultText = "http://";
+    var tableDefaultRowsCols = "2";
 
     // -------------------------------------------------------------------
     //  END OF YOUR CHANGES
@@ -8831,6 +8838,7 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
                                                   * image url (or null if the user cancelled). If this hook returns false, the default dialog will be used.
                                                   */
         hooks.addFalse("insertLinkDialog");
+        hooks.addFalse("insertTableDialog");
 
         this.getConverter = function () { return markdownConverter; }
 
@@ -10061,7 +10069,7 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
             });
             addKeyCmd(identifierList);
         }
-        addKeyCmd(['bold', 'italic', 'link', 'quote', 'code', 'image', 'olist', 'ulist', 'heading', 'hr']);
+        addKeyCmd(['bold', 'italic', 'link', 'quote', 'code', 'image', 'olist', 'ulist', 'heading', 'hr', 'tb']);
         
         /*benweet
         util.addEvent(inputBox, keyEvent, function (key) {
@@ -10364,11 +10372,13 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
             }));
             buttons.heading = makeButton("wmd-heading-button", getStringAndKey("heading"), "-160px", bindCommand("doHeading"));
             buttons.hr = makeButton("wmd-hr-button", getStringAndKey("hr"), "-180px", bindCommand("doHorizontalRule"));
+            buttons.tb = makeButton("wmd-table-button", getStringAndKey("tb"), "-200px", bindCommand("doTableRule"));
+
             // makeSpacer(3);
-            buttons.undo = makeButton("wmd-undo-button", getStringAndKey("undo"), "-200px", null);
+            buttons.undo = makeButton("wmd-undo-button", getStringAndKey("undo"), "-220px", null);
             buttons.undo.execute = function (manager) { inputBox.session.getUndoManager().undo(); };
 
-            buttons.redo = makeButton("wmd-redo-button", getStringAndKey("redo"), "-220px", null);
+            buttons.redo = makeButton("wmd-redo-button", getStringAndKey("redo"), "-240px", null);
             buttons.redo.execute = function (manager) { inputBox.session.getUndoManager().redo(); };
 
             if (helpOptions) {
@@ -10377,7 +10387,7 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
                 helpButton.appendChild(helpButtonImage);
                 helpButton.className = "wmd-button wmd-help-button";
                 helpButton.id = "wmd-help-button" + postfix;
-                helpButton.XShift = "-240px";
+                helpButton.XShift = "-260px";
                 helpButton.isHelp = true;
                 helpButton.style.right = "0px";
                 helpButton.title = getString("help");
@@ -11141,6 +11151,47 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
         chunk.startTag = "----------\n";
         chunk.selection = "";
         chunk.skipLines(1, 1, true);
+    }
+
+    commandProto.doTableRule = function (chunk, postProcessing) {
+        chunk.trimWhitespace();
+        // 先不添加对已有的进行修改的方案
+        // chunk.findTags(/\s*|)
+        
+        chunk.startTag = chunk.endTag = "";
+
+        var tableEnteredCallback = function(rows, cols) {
+            background.parentNode.removeChild(background);
+            
+            // build table header
+            chunk.startTag = "|";
+            var separator = "|";
+            var one_line = '|'
+            for(var i = 0; i < cols; i++) {
+                chunk.startTag += ' title_' + String(i) + ' |';
+                separator += ' ---- |';
+                one_line += ' |';
+            }
+            chunk.startTag += '\n' + separator + '\n';
+            one_line += '\n';
+            // build table content
+            chunk.selection = "";
+            for(var i = 0 ; i < rows; i++) {
+                chunk.selection += one_line;
+            }
+
+            chunk.endTag = "";
+
+            postProcessing();
+        };
+
+        background = ui.createBackground();
+
+        if (!this.hooks.insertTableDialog(tableEnteredCallback))
+            ui.prompt(this.getString("tabledialog"), tableDefaultRowsCols, tableEnteredCallback);
+                    
+        return true;                    
+
     }
 
 })();
@@ -14271,6 +14322,15 @@ define('shortcutMgr',[
             },
             isPageDown: true
         },
+        'tb': {
+            title: 'Table Rule',
+            defaultKey: {
+                win: 'Ctrl-M',
+                mac: 'Command-T|Ctrl-M',
+            },
+            isPageDown: true
+        },
+
         'undo': {
             title: 'Undo',
             defaultKey: {
@@ -14568,6 +14628,7 @@ define('shortcutMgr',[
                                                   * image url (or null if the user cancelled). If this hook returns false, the default dialog will be used.
                                                   */
         hooks.addFalse("insertLinkDialog");
+        hooks.addFalse("insertTableDialog");
 
         this.getConverter = function () { return markdownConverter; }
 
@@ -15756,6 +15817,9 @@ define('shortcutMgr',[
                             doClick(buttons.undo);
                         }
                         break;
+                    case 'm':
+                        doClick(buttons.tb);
+                        break;
                     case "v":
                         undoManager.setMode("typing");
                         return;
@@ -16003,15 +16067,17 @@ define('shortcutMgr',[
             }));
             buttons.heading = makeButton("wmd-heading-button", getString("heading"), "-160px", bindCommand("doHeading"));
             buttons.hr = makeButton("wmd-hr-button", getString("hr"), "-180px", bindCommand("doHorizontalRule"));
+            buttons.tb = makeButton("wmd-table-button", getString("tb"), "-200px", bindCommand("doTableRule"));
+
             // makeSpacer(3);
-            buttons.undo = makeButton("wmd-undo-button", getString("undo"), "-200px", null);
+            buttons.undo = makeButton("wmd-undo-button", getString("undo"), "-220px", null);
             buttons.undo.execute = function (manager) { if (manager) manager.undo(); };
 
             var redoTitle = /win/.test(nav.platform.toLowerCase()) ?
                 getString("redo") :
                 getString("redomac"); // mac and other non-Windows platforms
 
-            buttons.redo = makeButton("wmd-redo-button", redoTitle, "-220px", null);
+            buttons.redo = makeButton("wmd-redo-button", redoTitle, "-240px", null);
             buttons.redo.execute = function (manager) { if (manager) manager.redo(); };
 
             if (helpOptions) {
@@ -16020,7 +16086,7 @@ define('shortcutMgr',[
                 helpButton.appendChild(helpButtonImage);
                 helpButton.className = "wmd-button wmd-help-button";
                 helpButton.id = "wmd-help-button" + postfix;
-                helpButton.XShift = "-240px";
+                helpButton.XShift = "-260px";
                 helpButton.isHelp = true;
                 helpButton.style.right = "0px";
                 helpButton.title = getString("help");
@@ -16788,6 +16854,48 @@ define('shortcutMgr',[
         chunk.skipLines(1, 1, true);
     }
 
+    // add table rule
+    commandProto.doTableRule = function (chunk, postProcessing) {
+        chunk.trimWhitespace();
+        // 先不添加对已有的进行修改的方案
+        // chunk.findTags(/\s*|)
+        
+        chunk.startTag = chunk.endTag = "";
+
+        var tableEnteredCallback = function(rows, cols) {
+            background.parentNode.removeChild(background);
+            
+            // build table header
+            chunk.startTag = "|";
+            var separator = "|";
+            var one_line = '|'
+            for(var i = 0; i < cols; i++) {
+                chunk.startTag += ' title_' + String(i) + ' |';
+                separator += ' ---- |';
+                one_line += ' |';
+            }
+            chunk.startTag += '\n' + separator + '\n';
+            one_line += '\n';
+            // build table content
+            chunk.selection = "";
+            for(var i = 0 ; i < rows; i++) {
+                chunk.selection += one_line;
+            }
+
+            chunk.endTag = "";
+
+            postProcessing();
+        };
+
+        background = ui.createBackground();
+
+        if (!this.hooks.insertTableDialog(tableEnteredCallback))
+            ui.prompt(this.getString("tabledialog"), tableDefaultRowsCols, tableEnteredCallback);
+                    
+        return true;                    
+
+    }
+
 })();
 
 define("pagedown-light", function(){});
@@ -16830,6 +16938,35 @@ define('core',[
             + '<div class="input-group"><span class="input-group-addon"><i class="fa fa-link"></i></span><input id="input-insert-link" type="text" class="col-sm-5 form-control" placeholder="http://example.com  ' + getMsg('optional title') + '"></div></div><div class="modal-footer"><a href="#" class="btn btn-default" data-dismiss="modal">' + getMsg('Cancel') + '</a> <a href="#" class="btn btn-primary action-insert-link" data-dismiss="modal">' + getMsg('OK') + '</a></div></div></div></div>');
 
     var actionInsertLinkO = insertLinkO.find('.action-insert-link');
+
+    // tabel 
+    var insertTableO = $('<div class="modal fade modal-insert-table">' + 
+                            '<div class="modal-dialog">' + 
+                                '<div class="modal-content">' + 
+                                    '<div class="modal-header">' + 
+                                        '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' + 
+                                        '<h4 class="modal-title">' + getMsg('Table') + '</h4>' + 
+                                    '</div>' +
+                                    '<div class="modal-body">' + 
+                                        '<div class="input-group">' + 
+                                            '<span class="input-group-addon"> '+ getMsg('rows')  +':</span>' +
+                                            '<input id="input-insert-table-rows" type="text" class="col-sm-5 form-control" placeholder="' + getMsg('table rows, must not bigger than 1000') + '">' +                                            
+                                        '</div>' + 
+                                        '<br>' +
+                                        '<div class="input-group">' + 
+                                            '<span class="input-group-addon"> ' + getMsg('cols') + ' </span>' +                                            
+                                            '<input id="input-insert-table-cols" type="text" class="col-sm-5 form-control" placeholder="' + getMsg('table cols, must not bigger than 10') + '">' +
+                                        '</div>' + 
+
+                                    '</div>' + 
+                                    '<div class="modal-footer">' + 
+                                        '<a href="#" class="btn btn-default" data-dismiss="modal">' + getMsg('Cancel') + '</a>' + 
+                                        '<a href="#" class="btn btn-primary action-insert-table" data-dismiss="modal">' + getMsg('OK') + '</a>' + 
+                                    '</div>' + 
+                                '</div>' +
+                            '</div>' + 
+                        '</div>');
+    var actionInsertTableO = insertTableO.find('.action-insert-table');
 
     // Create ACE editor
     var aceEditor;
@@ -16973,10 +17110,19 @@ define('core',[
             insertLinkO.modal();
             return true;
         });
+        
         // Custom insert image dialog
         editor.hooks.set("insertImageDialog", function(callback) {
             // life, atom
             insertLocalImage();
+            return true;
+        });
+
+        // Custom insert table dialog
+        editor.hooks.set("insertTableDialog", function(callback) {
+            core.insertTableCallback = callback;
+            utils.resetModalInputs();
+            insertTableO.modal();
             return true;
         });
 
@@ -17328,9 +17474,13 @@ define('core',[
         $("#wmd-ulist-button").append($('<i class="fa fa-list-ul">')).appendTo($btnGroupElt);
         $("#wmd-heading-button").append($('<i class="fa fa-header">')).appendTo($btnGroupElt);
         $("#wmd-hr-button").append($('<i class="fa fa-ellipsis-h">')).appendTo($btnGroupElt);
+        // add table by cc
+        $("#wmd-table-button").append($('<i class="fa fa-table">')).appendTo($btnGroupElt);
+
         // $btnGroupElt = $('.wmd-button-group4');
         $("#wmd-undo-button").append($('<i class="fa fa-undo">')).appendTo($btnGroupElt);
         $("#wmd-redo-button").append($('<i class="fa fa-repeat">')).appendTo($btnGroupElt);
+        
 
         core._initModeToolbar();
     };
@@ -17650,6 +17800,18 @@ define('core',[
             var url = "http://leanote.leanote.com/post/Leanote-Markdown-Manual";
             openExternal(url);
         });
+
+        // insert table action
+        actionInsertTableO.click(function(e) {
+            var rows = utils.getInputIntValue($("#input-insert-table-rows"), e, 1, 1000);
+            var cols = utils.getInputIntValue($("#input-insert-table-cols"), e, 1, 10);
+            
+            if(rows !== undefined && cols != undefined) {
+                core.insertTableCallback(rows, cols);
+                core.insertTableCallback = undefined;
+            }
+        });
+
     });
 
     return core;
