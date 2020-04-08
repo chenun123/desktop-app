@@ -11,6 +11,8 @@
     <title class="lang">Leanote, Not Just A Notepad</title>
 
     <link href="public/css-libs/bootstrap.css" rel="stylesheet" />
+    <link href="public/css/electron-tabs.css" rel="stylesheet" />
+    <link rel="stylesheet" href="node_modules/dragula/dist/dragula.css">
     <!-- 先加载, 没有样式, 宽度不定 -->
     <link rel="stylesheet" href="public/tinymce/skins/custom/skin.min.css" rel="stylesheet" />
     <!-- leanote css -->
@@ -303,6 +305,12 @@
                         </div>
 
                         <div id="noteTop">
+                            <div id="tab" class="clearfix etabs-tabgroup" style="display: none;">
+                                <div class="etabs-tabs" id="tabContent">
+
+                                </div>
+                                
+                            </div>
                             <!-- 左侧放tag, 右侧放按钮, 比如save, info, move, delete -->
                             <div id="tool" class="clearfix">
 
@@ -315,6 +323,11 @@
                                     <li>
                                         <a class="ios7-a lang-title lang-title" id="editBtn" data-toggle="dropdown" title="ctrl/cmd+e Toggle Modify with Readonly">
                                             <span class="fa"></span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="ios7-a lang-title" id="locationToggle" data-toggle="dropdown" title="Location the note">
+                                            <span class="fa fa-folder-o"></span>
                                         </a>
                                     </li>
 
@@ -354,11 +367,18 @@
                                             <span class="fa fa-expand"></span>
                                         </a>
                                     </li>
+
+                                    <li>
+                                        <a class="ios7-a lang-title" id="tabToggle" data-toggle="dropdown" title="Toggle tab view">
+                                            <span class="more-fa fa fa-angle-up"></span>
+                                        </a>
+                                    </li>
+
                                 </ul>
                             </div>
                         </div>
 
-                        <div id="editor">
+                        <div id="editor" class="tabHidden">
                             <!-- 编辑器 -->
                             <div id="mceToolbar">
                                 <div id="mceToolbarContainer">
@@ -420,7 +440,7 @@
                             </div>
                         </div>
 
-                        <div id="mdEditor">
+                        <div id="mdEditor" class="tabHidden">
 
                             <div class="layout-wrapper-l1">
                                 <div class="layout-wrapper-l2">
@@ -725,8 +745,12 @@
         <script src="public/js/app/notebook.js"></script>
         <script src="public/js/object_id.js"></script>
 
+
         <!-- 使用require js -->
         <script src="public/js/require.js"></script>
+
+        <script src="public/js/tabs.js"></script>
+
         <!-- 导入插件 执行 -->
         <script src="public/js/main.js"></script>
         <!-- markdown editor -->

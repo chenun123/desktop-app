@@ -60,6 +60,42 @@ var Writting = {
     },
 };
 
+var Tabing = {
+    _mode : 'hidden',
+    editorO : $('#editor'),
+    mdEditorO: $('#mdEditor'),
+    tabContentO: $('#tab'),
+    tabingToggleO: $('#tabToggle'),
+    isTabing: function() {
+        return this._mode != 'hidden';
+    },
+    init: function() {
+        var me = this;
+        // 添加tab
+        me.tabingToggleO.click(function() {
+            me.toggle();
+        });
+    },
+    toggle: function() {
+        var me = this;
+        me._mode = me._mode == 'hidden'?'show': 'hidden';
+        if(me._mode != 'hidden') {
+            me.tabContentO[0].style.display = 'block';
+            me.editorO.removeClass('tabHidden');
+            me.mdEditorO.removeClass('tabHidden');
+            $('#tabToggle span').removeClass('fa-angle-up').addClass('fa-angle-down');
+        } else {
+            me.tabContentO[0].style.display = 'none';
+            me.editorO.addClass('tabHidden');
+            me.mdEditorO.addClass('tabHidden');
+            $('#tabToggle span').removeClass('fa-angle-down').addClass('fa-angle-up');
+        }
+
+    },
+
+};
+
+
 //----------------
 // 拖拉改变变宽度
 var Resize = {
@@ -2362,7 +2398,7 @@ function userMenu(allUsers) {
 $(function() {
     initUploadImage();
     Writting.init();
-
+    Tabing.init();
     // disable drag & drop
     document.body.addEventListener('dragover', function(e) {
         e.preventDefault();

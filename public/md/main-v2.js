@@ -8713,7 +8713,7 @@ define("bower-libs/pagedown-ace/Markdown.Converter", function(){});
         undo: getMsg("Undo") + " -",
         redo: getMsg("Redo") + " -",
         
-        tb: getMsg("Table") + "<tb>",
+        tb: getMsg("Table") + "<tb> Ctrl/Cmd+M",
 
         help: "Markdown Editing Help"
     };
@@ -14563,6 +14563,8 @@ define('shortcutMgr',[
 
         hr: getMsg("Horizontal Rule") + ' <hr> Ctrl/Cmd+R',
 
+        tb: getMsg("Table") + "<tb> Ctrl/Cmd+M",
+
         undo: getMsg("Undo") + ' - Ctrl/Cmd+Z',
         redo: getMsg("Redo") + ' - Ctrl/Cmd+Y',
         redomac: getMsg("Redo") + " - Ctrl+Shift+Z",
@@ -15838,6 +15840,15 @@ define('shortcutMgr',[
                 if (window.event) {
                     window.event.returnValue = false;
                 }
+            } else if(key.keyCode == 9) { // tab
+                if (key.preventDefault) {
+                    key.preventDefault();
+                }
+                //
+                var fakeButton = {};
+                fakeButton.textOp = bindCommand("doInsertTab");
+                doClick(fakeButton);
+
             }
         });
 
@@ -16477,6 +16488,10 @@ define('shortcutMgr',[
             chunk.after = chunk.selection + chunk.after;
             chunk.selection = "";
         }
+    };
+
+    commandProto.doInsertTab = function (chunk, postProcessing) {
+        chunk.startTag = '\t' + chunk.startTag;
     };
 
     commandProto.doBlockquote = function (chunk, postProcessing) {

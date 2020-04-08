@@ -5,7 +5,6 @@
 // 2. note change, save cur, 立即curNoteId = ""!!
 
 // 3. 什么时候设置curNoteId? 是ajax得到内容之后设置
-
 // note
 Note.curNoteId = "";
 
@@ -23,9 +22,9 @@ Note.notebookIds = {}; // notebookId => true
 // blog, star, settings
 var itemIsBlog = '<div class="item-options"><div class="item-blog"><i class="fa fa-bold" title="' + getMsg('Blog') + '"></i></div><div class="item-conflict-info"><i class="fa fa-bug" title="' + getMsg('Conflict') + '!!"></i></div><div class="item-warning"><i class="fa fa-warning" title="' + getMsg('Error') + '!!"></i></div><div class="item-star"><i class="fa fa-star-o" title="' + getMsg('Star') + '"></i></div><div class="item-setting"><i class="fa fa-cog" title="' + getMsg('Setting') + '"></i></div></div>';
 Note.itemTplNoImg = '<li href="#" class="item ?" data-seq="?" noteId="?">';
-Note.itemTplNoImg += itemIsBlog + '<div class="item-desc"><p class="item-title">?</p><p class="item-info"><i class="fa fa-book"></i> <span class="note-notebook">?</span> <i class="fa fa-clock-o"></i> <span class="updated-time">?</span></p><p class="desc">?</p></div></li>';
+Note.itemTplNoImg += itemIsBlog + '<div class="item-desc"><p class="item-title">?</p><p class="item-info"><i class="?"></i> <span class="note-notebook">?</span> <i class="fa fa-clock-o"></i> <span class="updated-time">?</span></p><p class="desc">?</p></div></li>';
 Note.itemTpl = '<li href="#" class="item ? item-image" data-seq="?" noteId="?"><div class="item-thumb" style=""><img src="?"/></div>';
-Note.itemTpl += itemIsBlog + '<div class="item-desc" style=""><p class="item-title">?</p><p class="item-info"><i class="fa fa-book"></i> <span class="note-notebook">?</span> <i class="fa fa-clock-o"></i> <span class="updated-time">?</span></p><p class="desc">?</p></div></li>';
+Note.itemTpl += itemIsBlog + '<div class="item-desc" style=""><p class="item-title">?</p><p class="item-info"><i class="?"></i> <span class="note-notebook">?</span> <i class="fa fa-clock-o"></i> <span class="updated-time">?</span></p><p class="desc">?</p></div></li>';
 
 Note.switchView = function(view) {
     const viewList = ['snippet', 'list'];
@@ -707,8 +706,7 @@ Note.directToNote = function(noteId) {
 // mustPush表示是否将状态push到state中, 默认为true
 // 什么时候为false, 在popstate时
 // needTargetNobook默认为false, 在点击notebook, renderfirst时为false
-Note.changeNoteForPjax = function(noteId, mustPush, needTargetNotebook) {
-    // console.trace('changeNoteForPjax');
+Note.changeNoteForPjax = function(noteId, mustPush, needTargetNotebook) {    
     var me = this;
     if (!noteId) {
         return;
@@ -755,6 +753,9 @@ Note.changeNoteForPjax = function(noteId, mustPush, needTargetNotebook) {
         // 如果是子笔记本, 那么要展开父笔记本
         Notebook.expandNotebookTo(note.NotebookId);
     }
+
+    console.log("open note ->" + noteId + ' title ->' + note.Title + ' isMd->' +note.IsMarkdown);
+    TabSerivce.addTabOrActive(noteId, note.Title, note.IsMarkdown);
 };
 
 // 点击notebook时调用, 渲染第一个笔记
@@ -1105,9 +1106,9 @@ Note._getNoteHtmlObjct = function(note, isShared) {
 
         var tmp;
         if (note.ImgSrc) {
-            tmp = tt(Note.getItemTpl(), classes, this.newNoteSeq(), note.NoteId, Note.fixImageSrc(note.ImgSrc), note.Title || getMsg('UnTitled'), Notebook.getNotebookTitle(note.NotebookId), goNowToDatetime(note.UpdatedTime), note.Desc);
+            tmp = tt(Note.getItemTpl(), classes, this.newNoteSeq(), note.NoteId, Note.fixImageSrc(note.ImgSrc), note.Title || getMsg('UnTitled'), note.IsMarkdown?'fa fa-code': 'fa fa-book', Notebook.getNotebookTitle(note.NotebookId), goNowToDatetime(note.UpdatedTime), note.Desc);
         } else {
-            tmp = tt(Note.getItemTplNoImg(), classes, this.newNoteSeq(), note.NoteId, note.Title || getMsg('UnTitled'), Notebook.getNotebookTitle(note.NotebookId), goNowToDatetime(note.UpdatedTime), note.Desc);
+            tmp = tt(Note.getItemTplNoImg(), classes, this.newNoteSeq(), note.NoteId, note.Title || getMsg('UnTitled'), note.IsMarkdown?'fa fa-code': 'fa fa-book', Notebook.getNotebookTitle(note.NotebookId), goNowToDatetime(note.UpdatedTime), note.Desc);
         }
         // blog ?
         var $tmp = $(tmp);
@@ -1175,9 +1176,9 @@ Note._getNoteHtmlObjct = function(note, isShared) {
 
             var tmp;
             if (note.ImgSrc) {
-                tmp = tt(Note.getItemTpl(), classes, i, note.NoteId, Note.fixImageSrc(note.ImgSrc), note.Title || getMsg('UnTitled'), Notebook.getNotebookTitle(note.NotebookId), goNowToDatetime(note.UpdatedTime), note.Desc || '');
+                tmp = tt(Note.getItemTpl(), classes, i, note.NoteId, Note.fixImageSrc(note.ImgSrc), note.Title || getMsg('UnTitled'), note.IsMarkdown?'fa fa-code': 'fa fa-book', Notebook.getNotebookTitle(note.NotebookId), goNowToDatetime(note.UpdatedTime), note.Desc || '');
             } else {
-                tmp = tt(Note.getItemTplNoImg(), classes, i, note.NoteId, note.Title || getMsg('UnTitled'), Notebook.getNotebookTitle(note.NotebookId), goNowToDatetime(note.UpdatedTime), note.Desc || '');
+                tmp = tt(Note.getItemTplNoImg(), classes, i, note.NoteId, note.Title || getMsg('UnTitled'), note.IsMarkdown?'fa fa-code': 'fa fa-book', Notebook.getNotebookTitle(note.NotebookId), goNowToDatetime(note.UpdatedTime), note.Desc || '');
             }
 
             Note.noteItemListO.append(tmp);
@@ -1241,7 +1242,7 @@ Note.newNote = function(notebookId, isShare, fromUserId, isMarkdown) {
     var notebookTitle = notebook ? notebook.Title : "";
     var curDate = getCurDatetime();
 
-    newItem = tt(Note.getItemTplNoImg(), baseClasses, me.newNoteSeq(), note.NoteId, note.Title, notebookTitle, curDate, "");
+    newItem = tt(Note.getItemTplNoImg(), baseClasses, me.newNoteSeq(), note.NoteId, note.Title, note.IsMarkdown?'fa fa-code': 'fa fa-book', notebookTitle, curDate, "");
 
     newItem = $(newItem);
     // newItem.find(".item-blog").hide();

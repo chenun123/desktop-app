@@ -324,6 +324,8 @@
     "Snippet View": "摘要视图",
     "List View": "列表视图",
 
+    "Toggle tab view": "打开/关闭tab视图",
+
     "Network error, please check out your network.": "网络异常, 请检查网络或稍后再试",
     "You need to sign in Leanote": "您需要重新登录Leanote",
     "You need to upgrade Leanote account": "同步失败, 帐户已到期或流量已用完, 您需要升级Leanote帐户",

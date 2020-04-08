@@ -171,17 +171,25 @@ h3 {
     }
 }
 
+#tab {
+    height: 36px;
+}
+
 #editor,
 #mdEditor {
     position: absolute;
     z-index: 2;
-    top: 36px;
+    top:72px;
     bottom: 30px;
     right: 0;
     // left: 5px;  
     left: 0;
     padding: 0; // 0px 0px 0px 0px;
     display: none;
+}
+
+.tabHidden {
+    top: 36px !important
 }
 
 #mdEditor {
@@ -1806,7 +1814,7 @@ h3 {
 #noteTitleDiv {
     position: absolute;
     left: 0;
-    right: 140px;
+    right: 210px;
     height: 35px;
     line-height: 35px;
     padding-left: 10px;
