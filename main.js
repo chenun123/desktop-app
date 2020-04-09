@@ -206,7 +206,7 @@ function openIt() {
 
   console.log('load: file://' + __dirname + '/note.html');
   
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   // and load the index.html of the app.
   mainWindow.loadURL('file://' + __dirname + '/note.html');
 

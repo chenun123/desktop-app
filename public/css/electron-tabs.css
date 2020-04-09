@@ -1,0 +1,165 @@
+.etabs-tabgroup {
+  width: 100%;
+  height: 32px;
+  background-color: #ccc;
+  cursor: default;
+  font: caption;
+  font-size: 14px;
+  -webkit-user-select: none;
+  user-select: none;
+  display: block;  
+}
+
+
+
+.etabs-tabgroup.visible {
+	display: block;
+}
+
+.etabs-tabs {
+  overflow-y: hidden;
+  overflow-x: scroll;
+  width: 100%;
+  height: 36px;
+  float: left;
+  white-space: nowrap;
+}
+
+.etabs-tabs::-webkit-scrollbar {
+    height:8px;
+    background-color:rgba(122, 122, 100, .3);
+}
+.etabs-tabs::-webkit-scrollbar-track {
+    background-color:rgba(255,255,255,.2);
+}
+
+.etabs-tabs::-webkit-scrollbar-thumb {
+    border-radius:10px;
+    background-color:rgba(123, 123, 123, .3);
+}
+
+
+.etabs-tab {
+  position: relative;
+  color: #333;
+  height: 18px;
+  padding: 4px 8px 24px;
+  padding-right: 2px;
+  border: 1px solid #aaa;
+  border-bottom: none;
+  border-left: none;
+  background: linear-gradient(to bottom, rgba(234,234,234,1) 0%,rgba(204,204,204,1) 100%);
+  font: caption;
+  font-size: 10px;
+  background-color: #ccc;
+  cursor: default;
+  display: inline-block;  
+}
+
+/* Dragula */
+.etabs-tab.gu-mirror {
+  padding-bottom: 0;
+}
+
+.etabs-tab:first-child {
+  border-left: none;
+}
+
+.etabs-tab.visible {
+  display: inline-block;
+}
+
+.etabs-tab.active {
+  background: #fff;
+}
+
+.etabs-tab.flash {
+  background: linear-gradient(to bottom, rgba(255,243,170,1) 0%,rgba(255,227,37,1) 100%);
+}
+
+.etabs-buttons {
+  float: left;
+}
+
+.etabs-buttons button {
+  float: left;
+  color: #333;
+  background: none;
+  border: none;
+  font-size: 12px;
+  margin-top: 6px;
+  border-radius: 2px;
+  margin-left: 4px;
+  width: 20px;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.etabs-buttons button:hover {
+  color: #eee;
+  background-color: #aaa;
+}
+
+.etabs-tab-badge {
+  position: absolute;
+  right: 0;
+  top: -7px;
+  background: red;
+  border-radius: 100%;
+  text-align: center;
+  font-size: 10px;
+  padding: 0 5px;
+}
+
+.etabs-tab-badge.hidden {
+  display: none;
+}
+
+.etabs-tab-icon {
+  display: inline-block;
+  height: 16px;
+}
+
+.etabs-tab-icon img {
+  max-width: 16px;
+  max-height: 16px;
+}
+
+.etabs-tab-title {
+  display: inline-block;
+  margin-left: 10px;
+  max-width: 80px;
+  overflow: hidden;
+  padding-top: 2px;
+  text-overflow: ellipsis;
+}
+
+.etabs-tab-buttons {
+  display: inline-block;
+  margin-left: 2px;
+}
+
+.etabs-tab-buttons button {
+  display: inline-block;
+  color: #333;
+  background: none;
+  border: none;
+  width: 20px;
+  text-align: center;
+  border-radius: 2px;
+}
+
+.etabs-tab-buttons button:hover {
+  color: #eee;
+  background-color: #aaa;
+}
+
+.etabs-views {
+  position: relative;
+  border-top: 1px solid #aaa;
+  height: calc(100vh - 33px);
+}
+
+.etab-view {
+  position: relative;
+}

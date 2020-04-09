@@ -9,10 +9,13 @@
   "dependencies": {
     "async": "^0.9.2",
     "dragula": "^3.7.2",
+    "handsontable": "^7.4.2",
+    "mammoth": "^1.4.9",
     "nedb": "^1.1.1",
     "needle": "^0.7.10",
     "node-getmac": "^1.0.3",
-    "resanitize": "^0.3.0"
+    "resanitize": "^0.3.0",
+    "xlsx": "^0.15.6"
   },
   "scripts": {
     "package": "electron-packager ./ leanote --platform=darwin --arch=x64 --out=../leanote --electron-version=8.0.0",

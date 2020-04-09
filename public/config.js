@@ -33,7 +33,7 @@ var Config = {
             "name": "日本語"
         }
     ],
-    "lang": "",
-    "theme": "water",
+    "lang": "zh-cn",
+    "theme": "pebbles",
     "view": "snippet"
 };

@@ -7,6 +7,9 @@ var attach_content_var = null;
 var converter = null;
 //const path = require('path')
 const shell = require('electron').shell
+const mammoth = require('mammoth');
+const handsontable = require('handsontable');
+
 define(function() {
 
     var tpl = ['<div class="modal fade attach-modal" tabindex="-1" role="dialog" aria-hidden="true">',
@@ -73,7 +76,7 @@ define(function() {
                 docType == 'png' || 
                 docType == 'jpg' || 
                 docType == 'bmp' || 
-                docType == 'ico' ||
+                docType == 'ico' ||                
                 supportType.indexOf(docType) >= 0 ||
                 needConvType.indexOf(docType) >= 0)
                 return true;
@@ -108,6 +111,107 @@ define(function() {
                 ].join('');
                 $attachContent.html(vpl);
 
+            } else if(attach.Type == 'docx') {
+                mammoth.convertToHtml({path: attach.Path})
+                    .then(function(result) {
+                        vpl = result.value; // The generated HTML
+                        //var messages = result.messages; // Any messages, such as warnings during conversion
+                        $attachContent.html(vpl);
+                    });
+
+            } else if(attach.Type == 'xlsx') {
+                //var objE = document.createElement("div");
+                var xlsx_id = 'open_attach_xlsx';
+                //$container = $(objE);
+                $container = $('<div></div>', {
+                    id: xlsx_id,
+                    width: '100%',
+                    height: '100%'
+                });
+                $container.addClass(xlsx_id + "_clas");
+                $container.addClass("wbSheets_clas");
+                                
+                // 添加事件
+                var loadXlsx  = function() {                   
+                    if(!xlsxService) {
+                        var xlsxService = require('xlsx');
+                    }
+                    //var vpl = xlsxService.utils.sheet_to_html();
+    
+                    var wb = xlsxService.read(attach.Path, { type: "file" });
+                    var sheetNames = wb.SheetNames;
+                    $container = $('#' +xlsx_id);
+                    $container.append('<ul class="wbSheets_clas_ul">');
+                    var li_container = "";
+                    sheetNames.forEach(function (sheetName, idx) {
+                        var subDivId = 'wbSheets_' + idx;                        
+                        $container.find("ul").append('<li><a href="#' + subDivId + '">' + sheetName + '</a></li>');
+                    });
+                    var hot, hot_ary = []; 
+                    var availableWidth, availableHeight;
+                    sheetNames.forEach(function (sheetName, idx) {
+                        var subDivId = 'wbSheets_' + idx;
+                        var json = xlsxService.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
+                        var dsply = "";
+                        
+                        if (idx == 0) {
+                            dsply = "display:block;";
+                        } else {
+                            dsply = "display:none;";
+                        }
+    
+                        var subDiv = $('<div/>').attr({
+                            class: 'wbSheets',
+                            id: subDivId,
+                            style: dsply
+                        });
+                        $container.append(subDiv);
+                        //availableWidth = Math.max(subDiv.width(),600);
+                        //availableHeight = Math.max(subDiv.height(), 500);
+                        availableWidth = $container.width() - 20;
+                        availableHeight = $container.height() - 50;
+                        /* add header row for table */
+                        if (!json) json = [];
+                        json.forEach(function (r) {
+                            //must "...,{header:1}"
+                            if (json[0].length < r.length) json[0].length = r.length;
+                        });
+                        //console.log(json)
+                        var container = $container.find('#'+subDivId);
+
+                        var cur_lang = window.curLang;
+
+                        var all_lang = {
+                            'de-de': 'de-DE',
+                            'zh-cn': 'zh-CN',
+                            'zh-hk': 'zh-TW',
+                            'ja-jp': 'ja-JP'
+                        };
+
+                        hot = new handsontable.default(container[0], {
+                            data: json,                        
+                            width: availableWidth,
+                            height: availableHeight,
+                            //licenseKey: 'non-commercial-and-evaluation',
+                            colHeaders: true,
+                            rowHeaders: true,
+                            sortIndicator: true,
+                            filters: true,
+                            contextMenu: true,
+                            dropdownMenu: true,
+                            language: all_lang[cur_lang]
+                        });
+                        hot_ary.push(hot);
+                    });
+                    $container.tabs({seleted: 0});
+                };
+
+                $container.ready(function() {
+                    setTimeout(loadXlsx, 1000);                    
+                });
+
+                $attachContent.html('');
+                $attachContent.append($container);
             } else if(attach.Type == 'png' || 
                 attach.Type == 'jpg' || 
                 attach.Type == 'bmp' || 
@@ -142,7 +246,9 @@ define(function() {
             $attachType.html(attach.Type);
             $attachContent.animate({scrollTop: '0px'});
             // show
-            $tpl.modal({show: true});
+            $tpl.modal({show: true,
+                           
+            });
         },
 
         bind: function () {
