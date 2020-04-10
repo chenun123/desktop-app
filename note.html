@@ -40,6 +40,12 @@
     <!-- for change theme -->
     <link rel="stylesheet" href="" type="text/css" id="theme" />
 
+    <style type="text/css">
+        .kw{background:#f00;color:#fff;}
+        .textarea-searchbox{position:absolute;display:none;border:solid 0px #000;background:#fff;overflow:auto;font-size:13px;}
+        .textarea-searchbox .close{text-align:right;color:blue}
+    </style>
+       
     <script>
         // for windows
         if (process.platform != 'darwin') {
@@ -504,6 +510,27 @@
                                             <pre id="wmd-input" class="form-control"><div id="wmd-input-sub" class="editor-content mousetrap" contenteditable=true></div><div class="editor-margin"></div></pre>
                                             <!-- v2 markdown lightmode需要 -->
                                             <div class="textarea-helper"></div>
+                                            <!-- v2 lightmode search box -->
+                                            <div id="lightmode_textarea-searchbox" class="right" style="display: none;">
+                                                <button type="button" action="#" class="close"></button>
+                                                <div class="search_form">
+                                                    <input class="search_field lang-placeholder" placeholder="Search for" spellcheck="false">
+                                                    <button type="button" action="#" class="searchbtn next"></button>
+                                                    <button type="button" action="#" class="searchbtn prev"></button>
+                                                    <!-- <button type="button" action="#" class="searchbtn" title="Alt-Enter">All</button> -->
+                                                </div>
+                                                <div class="replace_form">
+                                                    <input class="search_field lang-placeholder" placeholder="Replace with" spellcheck="false">
+                                                    <button type="button" action="#" class="replacebtn lang replace">Replace</button>
+                                                    <button type="button" action="#" class="replacebtn lang all">All</button>
+                                                </div>
+                                                <div class="search_options">
+                                                    <span action="#" class="button lang-title reg" title="RegExp Search">.*</span>
+                                                    <span action="#" class="button lang-title cap" title="CaseSensitive Search">Aa</span>
+                                                    <span action="#" class="button lang-title whole" title="Whole Word Search">\b</span>
+                                                </div>
+                                            
+                                            </div>
                                         </div>
                                         <div id="right-column">
                                             <div class="preview-panel panel-open" id="preview-panel">

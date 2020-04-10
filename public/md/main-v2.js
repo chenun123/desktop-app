@@ -14525,7 +14525,10 @@ define('shortcutMgr',[
         re = window.RegExp,
         nav = window.navigator,
         SETTINGS = { lineLength: 72 },
-
+        last_search = '',
+        search_pos = 0,
+        last_search_pos = 0,
+        last_search_len = 0,
     // Used to work around some browser bugs where we can't use feature testing.
         uaSniffed = {
             isIE: /msie/.test(nav.userAgent.toLowerCase()),
@@ -14571,7 +14574,157 @@ define('shortcutMgr',[
 
         help: "Markdown Editing Help"
     };
+    // 初始化搜索对话框信息
+    (function() {            
+        var me = this;    
+    //以下可以在全局初始化
+        var $searchbox = $('#lightmode_textarea-searchbox');
+        // hide first
+        $searchbox.hide();
+        // add event
+        //var closeBtn = $('#lightmode_textarea-searchbox .close');
+        $searchbox.on('click', '.close', function(e) {
+            $searchbox.hide();
+        });
+    
+        $searchbox.on('click', '.reg', function(e) {
+            console.log('toggle reg search');
+            $target = $(e.target);
+            if($target.hasClass('checked'))
+                $target.removeClass('checked');
+            else
+                $target.addClass('checked');
+        });
+    
+        $searchbox.on('click', '.cap', function(e) {
+            $target = $(e.target);
+            if($target.hasClass('checked'))
+                $target.removeClass('checked');
+            else
+                $target.addClass('checked');
+        });
+    
+        $searchbox.on('click', '.whole', function(e) {
+            $target = $(e.target);
+            if($target.hasClass('checked'))
+                $target.removeClass('checked');
+            else
+                $target.addClass('checked');
+        });            
+    
+        //添加
+        $search_field = $('#lightmode_textarea-searchbox > .search_form > .search_field');
+        
+        var search_next = function(e, dir) {
+            if(e.keyCode == '13' || e.type == 'click') {
+                if(e.preventDefault) e.preventDefault();
+                var one_search = $search_field.val();
+                if(one_search == '') 
+                    return;
+                
+                // begin search                    
+                // 使用
+                var $editorElt = $('#wmd-input');
+                if(one_search != last_search) {
+                    last_search = one_search;
+                    search_pos = 0;
+                }
+                // 大小写
+                var ignoreCase = !$('#lightmode_textarea-searchbox > .search_options > .cap').hasClass('checked');
+    
+                var matchReg = $('#lightmode_textarea-searchbox > .search_options > .reg').hasClass('checked');
+                // 
+                // test
+                ret_pos = Light_TT.selString($editorElt[0], one_search, search_pos, dir, ignoreCase, matchReg);
+                search_pos = ret_pos[0];
+                // save last search info
+                last_search_pos = ret_pos[0];
+                last_search_len = ret_pos[1];
+                // reset pos if need
+                if(search_pos < 0) 
+                    search_pos = 0;
+                else {
+                    if(dir == 0)
+                        search_pos = ret_pos[0] + ret_pos[1];
+                    else {
+                        search_pos = --ret_pos[0];
+                    }
+                }                    
+            }
+        }
 
+        var replace_next = function(e, all) {
+            if(e.type == 'click') {
+                if(e.preventDefault) e.preventDefault();
+                var one_search = $search_field.val();
+                if(one_search == '') 
+                    return; 
+
+                replace_data = $('#lightmode_textarea-searchbox > .replace_form > .search_field').val();
+                if(!all) {
+                    // 需要针对 - 搜索后，修改了内容时，，需要重新进行搜索。。。。。。。。。。。。
+                    // 获取当前选中的值，进行判断，如果是。。。TODO 后续再处理
+
+                    if(one_search != last_search || last_search_len == 0 || last_search_pos == -1) {
+                        //重新搜索
+                        //重置开始位置
+                        search_pos = 0;
+                        search_next(e, 0);
+                    }
+                    if(last_search_pos == -1)
+                        return;
+                    t = $('#wmd-input')[0];
+                    t.value = t.value.substring(0, last_search_pos) + $('#lightmode_textarea-searchbox > .replace_form > .search_field').val() + t.value.substring(last_search_pos + last_search_len);
+
+                    search_next(e, 0);
+                    return;
+                } 
+                // 所有-> 
+                ignoreCase = !$('#lightmode_textarea-searchbox > .search_options > .cap').hasClass('checked');    
+                matchReg = $('#lightmode_textarea-searchbox > .search_options > .reg').hasClass('checked');
+                
+                t = $('#wmd-input')[0];
+                if(matchReg) {
+                    t.value = t.value.replace(new RegExp(one_search, 'g' + ignoreCase?'i':''), replace_data);
+                } else {
+                    if(!ignoreCase)
+                        t.value = t.value.replace(one_search, replace_data);
+                    else {             
+                        // 忽略大小写，则使用           
+                        search_pos = 0;                        
+                        do {
+                            search_next(e, 0);
+                            if(last_search_pos == -1)
+                                break;
+                            t.value = t.value.substring(0, last_search_pos) + replace_data + t.value.substring(last_search_pos + last_search_len);
+                        }while(last_search_pos != -1);
+                    }
+                }
+            }            
+        }
+        
+        $search_field.on('keyup', function(e) {
+            search_next(e, 0);
+        });
+    
+        $('#lightmode_textarea-searchbox > .search_form > .next').click(function(e) {
+            search_next(e, 0);
+        });
+    
+        $('#lightmode_textarea-searchbox > .search_form > .prev').click(function(e) {
+            search_next(e, 1);
+        });
+    
+        // 添加replace
+        $('#lightmode_textarea-searchbox > .replace_form > .replace').click(function(e) {
+            replace_next(e, 0);
+        });
+        $('#lightmode_textarea-searchbox > .replace_form > .all').click(function(e) {
+            replace_next(e, 1);
+        });
+
+    
+    })();
 
     // -------------------------------------------------------------------
     //  YOUR CHANGES GO HERE
@@ -14669,7 +14822,11 @@ define('shortcutMgr',[
             //forceRefresh();
             that.undoManager = undoManager;
             that.uiManager = uiManager;
+
+            last_search = '';
+            search_pos  = 0;
         };
+        
 
     }
 
@@ -15828,6 +15985,18 @@ define('shortcutMgr',[
                     case "x":
                         undoManager.setMode("deleting");
                         return;
+                    case 'f':
+                        {
+                            console.log('find');
+                            if (key.preventDefault) {
+                                key.preventDefault();
+                            }
+                            //
+                            var fakeButton = {};
+                            fakeButton.textOp = bindCommand("doFind");
+                            doClick(fakeButton);
+                        }
+                        break;
                     default:
                         return;
                 }
@@ -16025,7 +16194,7 @@ define('shortcutMgr',[
         function bindCommand(method) {
             if (typeof method === "string")
                 method = commandManager[method];
-            return function () { method.apply(commandManager, arguments); }
+            return function () { return method.apply(commandManager, arguments); }
         }
 
         function makeSpritedButtonRow() {
@@ -16637,6 +16806,223 @@ define('shortcutMgr',[
             });
         }
     };
+
+
+    var Light_TT = {
+            /*
+         * 获取光标位置
+         * @Method getCursorPosition
+         * @param t element
+         * @return number
+         */
+            getCursorPosition: function(t) {
+                    if (document.selection) {
+                            t.focus();
+                            var ds = document.selection;
+                            var range = ds.createRange();
+                            var stored_range = range.duplicate();
+                            stored_range.moveToElementText(t);
+                            stored_range.setEndPoint("EndToEnd", range);
+                            t.selectionStart = stored_range.text.length - range.text.length;
+                            t.selectionEnd = t.selectionStart + range.text.length;
+                            return t.selectionStart;
+                    } else {
+                        return t.selectionStart;
+                    }
+            },
+    
+            /*
+         * 设置光标位置
+         * @Method setCursorPosition
+         * @param t element
+         * @param p number
+         * @return
+         */
+            setCursorPosition: function(t, p) {
+                    this.sel(t, p, p);
+            },
+    
+            /*
+         * 插入到光标后面
+         * @Method add
+         * @param t element
+         * @param txt String
+         * @return
+         */
+            add: function(t, txt) {
+                    var val = t.value;
+                    if (document.selection) {
+                            t.focus();
+                            document.selection.createRange().text = txt;
+                    } else {
+                            var cp = t.selectionStart;
+                            var ubbLength = t.value.length;
+                            var s = t.scrollTop;
+                            //    document.getElementById('aaa').innerHTML += s + '<br />';
+                            t.value = t.value.slice(0, t.selectionStart) + txt + t.value.slice(t.selectionStart, ubbLength);
+                            this.setCursorPosition(t, cp + txt.length);
+                            //    document.getElementById('aaa').innerHTML += t.scrollTop + '<br />';
+                            firefox = navigator.userAgent.toLowerCase().match(/firefox\/([\d\.]+)/) && setTimeout(function() {
+                                    if (t.scrollTop != s) t.scrollTop = s;
+                            },
+                            0)
+    
+                    };
+            },
+    
+            /*
+         * 删除光标 前面或者后面的 n 个字符
+         * @Method del
+         * @param t element
+         * @param n number  n>0 后面 n<0 前面
+         * @return
+         * 重新设置 value 的时候 scrollTop 的值会被清0
+         */
+            del: function(t, n) {
+                    var p = this.getCursorPosition(t);
+                    var s = t.scrollTop;
+                    var val = t.value;
+                    t.value = n > 0 ? val.slice(0, p - n) + val.slice(p) : val.slice(0, p) + val.slice(p - n);
+                    this.setCursorPosition(t, p - (n < 0 ? 0 : n));
+                    firefox = navigator.userAgent.toLowerCase().match(/firefox\/([\d\.]+)/) && setTimeout(function() {
+                            if (t.scrollTop != s) t.scrollTop = s;
+                    },
+                    10)
+            },
+    
+            /*
+         * 选中 s 到 z 位置的文字
+         * @Method sel
+         * @param t element
+         * @param s number
+         * @param z number
+         * @return
+         */
+            sel: function(t, s, z) {
+                    if (document.selection) {
+                            var range = t.createTextRange();
+                            range.moveEnd('character', -t.value.length);
+                            range.moveEnd('character', z);
+                            range.moveStart('character', s);
+                            range.select();
+                    } else {                                                        
+                            // var range = t.createTextRange();
+                            t.setSelectionRange(s, z);                                                        
+                            t.focus();                                            
+
+                            var scrollPre = document.createElement('pre');
+                            t.parentNode.appendChild(scrollPre);
+                            var style = window.getComputedStyle(t, '');
+                            scrollPre.style.lineHeight = style.lineHeight;
+                            scrollPre.style.fontFamily = style.fontFamily;
+                            scrollPre.style.fontSize = style.fontSize;
+                            scrollPre.style.padding = 0;
+                            scrollPre.style.letterSpacing = style.letterSpacing;
+                            scrollPre.style.border = style.border;
+                            scrollPre.style.outline = style.outline;
+                            scrollPre.style.overflow = 'scroll';
+                            // Different browsers calls this value differently:
+                            try { scrollPre.style.whiteSpace = "-moz-pre-wrap" } catch(e) {};
+                            try { scrollPre.style.whiteSpace = "-o-pre-wrap" } catch(e) {};
+                            try { scrollPre.style.whiteSpace = "-pre-wrap" } catch(e) {};
+                            try { scrollPre.style.whiteSpace = "pre-wrap" } catch(e) {};
+                            scrollPre.textContent = t.value.substring(0,s);
+                            t.scrollTop = scrollPre.scrollHeight-100;
+                            scrollPre.parentNode.removeChild(scrollPre);
+                    }
+    
+            },
+    
+            /*
+         * 选中一个字符串
+         * @Method sel
+         * @param t element
+         * @param s String
+         * @param lastpos int, 上一次查询位置
+         * @return
+         */
+            selString: function(t, s, lastpos, dir, ignoreCase, matchReg) {
+                    var _content = t.value;
+                    
+                    if(ignoreCase) {
+                        s = s.toLowerCase();
+                        _content = _content.toLowerCase();
+                    }                 
+                    
+                    var s_length = s.length;
+                    
+                    if(dir != 0 && lastpos == 0) {
+                        lastpos = _content.length -1;
+                    }
+                    
+                    var index = -1;
+
+                    if(matchReg) {
+                        var reg = new RegExp(s, 'g');                    
+                        var result;
+                        while ((result = reg.exec(_content)) != null) {
+                            // 计算反方向
+                            if(dir != 0) {
+                                if(result.index >= lastpos)
+                                break;                                                        
+                                index = result.index;
+                                s_length = reg.lastIndex - index;
+                            } else if(result.index >= lastpos) {// 正方向
+                                index = result.index;
+                                s_length = reg.lastIndex - index;
+                                break;
+                            }
+                        }
+                    } else {
+                        if(dir == 0) {
+                            index = _content.indexOf(s, lastpos);
+                        } else {
+                            index = _content.lastIndexOf(s, lastpos);
+                        }
+                    }
+                                                
+                    index != -1 ? this.sel(t, index, index + s_length) : false;
+                    if(index != -1) {
+                        return [index, s_length];                        
+                    }
+                    return [-1, 0];                        
+            }    
+    }
+
+    commandProto.doFind = function(chunk, postProcessing) {
+        // 获取选中数据，当做搜索内容
+        var search_default = chunk.selection;
+        $search_field = $('#lightmode_textarea-searchbox > .search_form > .search_field');
+        if(search_default != '') {            
+            $search_field.val(search_default);
+        }
+
+        $('#lightmode_textarea-searchbox').show();
+        $search_field.focus();
+
+        return true;
+
+        // show searchbox        
+        // var rx;
+        // var pop = $('#lightmode_textarea-searchbox');
+        // pop.hide();
+        // if(search_default != '' ){ 
+        //     var rx =new RegExp(search_default, 'g'); 
+        //     if(rx.test($editorElt.val())) {                
+        //         if(!pop.attr('init'))
+        //             pop.css({left:$editorElt.offset().left,
+        //                  top:$editorElt.offset().top,
+        //                  width:$editorElt.width(),
+        //                  height:$editorElt.height()});
+            
+        //         pop.html($editorElt.val().replace(rx,'<span class="kw">'+search_default+'</span>'));
+        //         pop.show();
+        //     }
+            
+        // }
+    
+
+    }
 
     // 这里, 应该用 ``` ```
     commandProto.doCode = function (chunk, postProcessing) {

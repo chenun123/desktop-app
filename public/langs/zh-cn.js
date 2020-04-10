@@ -323,6 +323,13 @@
 
     "Snippet View": "摘要视图",
     "List View": "列表视图",
+    "All" : "所有",
+    "Replace": "替换",
+    "Search for": "搜索",
+    "Replace with": "替换为",
+    "RegExp Search": "正则",
+    "CaseSensitive Search": "区分大小写",
+    "Whole Word Search": "整词",
 
     "Toggle tab view": "打开/关闭tab视图",
 
