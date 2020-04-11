@@ -428,7 +428,7 @@ var TabSerivce = {
         // 数字键
         if(evt.keyCode >= 49 && evt.keyCode <= 57 ) {          
           var tabIndex = evt.keyCode - 49 ;
-          evt.preventDefault();
+          if(evt.preventDefault) evt.preventDefault();
           console.log("switch to tab:" + tabIndex);          
           let tab = me.tabGroup.getTabByPosition(tabIndex + 2);
           if(tab) {
@@ -436,48 +436,48 @@ var TabSerivce = {
           }
           
         } else if(evt.keyCode == 37) { // left
-          evt.preventDefault();
+          if(evt.preventDefault) evt.preventDefault();
           let tab = me.tabGroup.getPreviousTab();
           if(tab) {
             tab.activate();
           }
           
         } else if(evt.keyCode == 39) { // right
-            evt.preventDefault();
+          if(evt.preventDefault) evt.preventDefault();
             let tab = me.tabGroup.getNextTab();
             if(tab) {
               tab.activate();
             }
         } else if(evt.keyCode == 90) { // Z
-            evt.preventDefault();  
+          if(evt.preventDefault) evt.preventDefault();
             // close left
             var tab = null;
             while(tab = me.tabGroup.getPreviousTab()) {
                 tab.close();
             }
         } else if(evt.keyCode == 88) { // X            
-            evt.preventDefault();
+          if(evt.preventDefault) evt.preventDefault();
           // close current
             let tab = me.tabGroup.getActiveTab();
             if(tab) {
               tab.close();
             }
         } else if(evt.keyCode == 67) { // C
-          evt.preventDefault();
+          if(evt.preventDefault) evt.preventDefault();
            // right
            var tab = null;
             while(tab = me.tabGroup.getNextTab()) {
                 tab.close();
             }
         } else if(evt.keyCode == 68) { // D
-          evt.preventDefault();
+          if(evt.preventDefault) evt.preventDefault();
            // all
            var tab = null;
            while(tab = me.tabGroup.getActiveTab()) {
               tab.close();
            }
         } else if(evt.keyCode == 84) {
-          evt.preventDefault();
+          if(evt.preventDefault) evt.preventDefault();
           $('#tabToggle').click();
         }
       }

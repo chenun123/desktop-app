@@ -14516,6 +14516,8 @@ define('shortcutMgr',[
 });
 // needs Markdown.Converter.js at the moment
 
+// 初始化搜索对话框信息
+
 (function () {
 
     var util = {},
@@ -14535,6 +14537,190 @@ define('shortcutMgr',[
             isIE_5or6: /msie 6/.test(nav.userAgent.toLowerCase()) || /msie 5/.test(nav.userAgent.toLowerCase()),
             isOpera: /opera/.test(nav.userAgent.toLowerCase())
         };
+    
+    {
+        // 记录当前
+        // 用于进行下一个/前一个查询
+        var cur_html_search_pos = -1;
+        var html_search_size = 0;
+        //以下可以在全局初始化
+        var md_preivew_searchbox_id = 'md_preview-searchbox';
+        var $searchbox = $('#' + md_preivew_searchbox_id);
+        // hide first
+        $searchbox.hide();
+        // add event
+        //添加
+        // 判断当前是否有查询显示
+        var check_search_status = function () {
+            regExp = new RegExp('<span id=\"result\\d+\" class=\"kw\">([^<>]+)</span>', 'g');
+            found = false;
+            $('.wmd-preview-section.preview-content').each(function () {
+                if (!found) {
+                    cur_html = $(this).html();
+                    found = (regExp.exec(cur_html) != null);
+                }
+            });
+            // fix pos
+            if (!found) cur_html_search_pos = -1;
+            return found;
+        }
+
+        $pv_search_field = $('#' + md_preivew_searchbox_id + ' > .search_form > .search_field');
+        var search_html = function (e) {
+            if (!e || (e.keyCode == '13' || e.type == 'click')) {
+                if (e && e.preventDefault) e.preventDefault();
+                var one_search = $pv_search_field.val();
+                if (one_search == '')
+                    return;
+                // 判断是否已经搜索
+                // 大小写
+                var ignoreCase = !$('#' + md_preivew_searchbox_id + '> .search_options > .cap').hasClass('checked');
+                //搜索            
+                html_search_size = 0;
+                clearSerachResult();
+
+                $('.wmd-preview-section.preview-content').each(function () {
+                    cur_html = $(this).html();
+                    new_html = '';
+                    var tmp;
+                    regExp = new RegExp(one_search + '(?!([^<]+)?>)', 'g' + (ignoreCase ? 'i' : ''));
+                    cur_pos = 0;
+                    while ((tmp = regExp.exec(cur_html)) != null) {
+                        //添加匹配前面的
+                        new_html += cur_html.substring(cur_pos, tmp.index);
+                        new_html += '<span id="result' + (html_search_size++) + '" class="kw">' + tmp[0] + '</span>';
+                        cur_pos = regExp.lastIndex;
+                    }
+                    if (cur_pos != -1) {
+                        new_html += cur_html.substring(cur_pos);
+                    }
+
+                    // "<span id='result" + (index++) + "' class='kw'>" + one_search + "</span>"));
+                    $(this).html(new_html);
+                });
+            }
+        }
+        var clearSerachResult = function () {
+            $('.wmd-preview-section.preview-content').each(function () {
+                cur_html = $(this).html();
+                new_html = '';
+                var tmp;
+                regExp = new RegExp('<span id=\"result\\d+\" class=\"[(kw|current)?\\s?(kw|current)?]+\">([^<>]+)</span>', 'g');
+                cur_pos = 0;
+                while ((tmp = regExp.exec(cur_html)) != null) {
+                    //添加匹配前面的
+                    new_html += cur_html.substring(cur_pos, tmp.index);
+                    new_html += tmp[1];
+                    cur_pos = regExp.lastIndex;
+                }
+                if (cur_pos != -1) {
+                    new_html += cur_html.substring(cur_pos);
+                }
+                $(this).html(new_html);
+            });
+        }
+
+        // 移到下一目标
+        var focusMove = function (next_pos) {
+            //首先清除上一个标识节点
+            let $last_item = $('.kw.current');
+            if ($last_item.length > 0) {
+                $last_item.removeClass('current');
+            }
+
+            //查询指定的节点
+            let $next_item = $('#result' + next_pos);
+            if ($next_item.length > 0) {
+                $next_item.addClass('current');
+                //scoll page if need
+                // 计算scroll top
+                console.log('scroll');
+                var scroll_top = $next_item.offset().top - $('#preview-contents').offset().top;
+                $('#preview-contents').parent().animate({ scrollTop: scroll_top });
+            }
+        }
+
+        //var closeBtn = $('#lightmode_textarea-searchbox .close');
+        $searchbox.on('click', '.close', function (e) {
+            $searchbox.hide();
+            clearSerachResult();
+        });
+
+        $searchbox.on('click', '.cap', function (e) {
+            $target = $(e.target);
+            if ($target.hasClass('checked'))
+                $target.removeClass('checked');
+            else
+                $target.addClass('checked');
+            // reserach
+            clearSerachResult();
+            // 下一次查询
+            search_html(e);
+            if (html_search_size <= 0)
+                return;
+            // move to first
+            cur_html_search_pos = 0;
+            focusMove(cur_html_search_pos);
+        });
+
+        var search_html_next = function(e) {
+            // 首先判断是否已经搜索，如果没有，则
+            if (!check_search_status()) {
+                search_html(e);
+            }
+            if (html_search_size <= 0)
+                return;
+            cur_html_search_pos++;
+            if (cur_html_search_pos >= html_search_size) {
+                cur_html_search_pos = 0;
+            }
+            focusMove(cur_html_search_pos);
+        }
+
+        // 修改为实时查询
+        $pv_search_field.on('keyup', function (e) {
+            if (e.keyCode != '13')
+                return;
+            
+            search_html_next(e);
+        });
+
+        // 当filed 数据改变时
+        $pv_search_field.change(function() {
+            clearSerachResult();
+            search_html_next(null);
+
+        });
+
+        $('#' + md_preivew_searchbox_id + ' > .search_form > .next').click(function (e) {
+            search_html_next(e);
+        });
+
+        $('#' + md_preivew_searchbox_id + ' > .search_form > .prev').click(function (e) {
+            if (!check_search_status()) {
+                search_html(e);
+            }
+            // 搜索完成，Index则保存当前个数
+            if (html_search_size) {
+                cur_html_search_pos--;
+                if (cur_html_search_pos < 0)
+                    cur_html_search_pos = html_search_size - 1;
+                focusMove(cur_html_search_pos);
+            }
+        });
+        // 注册全局快捷响应
+        window.addEventListener('keyup', function (evt) {
+            if (!evt.altKey && !evt.shiftKey && (evt.metaKey || evt.ctrlKey)) {
+                // ctrl +f// 判断是否为MD 
+                if (evt.keyCode == 70 && LEA.isMarkdownEditor() && MD) {
+                    $searchbox = $('#md_preview-searchbox');
+                    $searchbox.show();
+                    $('#md_preview-searchbox > .search_form > .search_field').focus();
+                }
+            }
+        });
+
+    }
 
     var defaultsStrings = {
         bold: getMsg("Strong") + ' <strong> Ctrl/Cmd+B',
@@ -14574,158 +14760,6 @@ define('shortcutMgr',[
 
         help: "Markdown Editing Help"
     };
-    // 初始化搜索对话框信息
-    (function() {            
-        var me = this;    
-    //以下可以在全局初始化
-        var $searchbox = $('#lightmode_textarea-searchbox');
-        // hide first
-        $searchbox.hide();
-        // add event
-        //var closeBtn = $('#lightmode_textarea-searchbox .close');
-        $searchbox.on('click', '.close', function(e) {
-            $searchbox.hide();
-        });
-    
-        $searchbox.on('click', '.reg', function(e) {
-            console.log('toggle reg search');
-            $target = $(e.target);
-            if($target.hasClass('checked'))
-                $target.removeClass('checked');
-            else
-                $target.addClass('checked');
-        });
-    
-        $searchbox.on('click', '.cap', function(e) {
-            $target = $(e.target);
-            if($target.hasClass('checked'))
-                $target.removeClass('checked');
-            else
-                $target.addClass('checked');
-        });
-    
-        $searchbox.on('click', '.whole', function(e) {
-            $target = $(e.target);
-            if($target.hasClass('checked'))
-                $target.removeClass('checked');
-            else
-                $target.addClass('checked');
-        });            
-    
-        //添加
-        $search_field = $('#lightmode_textarea-searchbox > .search_form > .search_field');
-        
-        var search_next = function(e, dir) {
-            if(e.keyCode == '13' || e.type == 'click') {
-                if(e.preventDefault) e.preventDefault();
-                var one_search = $search_field.val();
-                if(one_search == '') 
-                    return;
-                
-                // begin search                    
-                // 使用
-                var $editorElt = $('#wmd-input');
-                if(one_search != last_search) {
-                    last_search = one_search;
-                    search_pos = 0;
-                }
-                // 大小写
-                var ignoreCase = !$('#lightmode_textarea-searchbox > .search_options > .cap').hasClass('checked');
-    
-                var matchReg = $('#lightmode_textarea-searchbox > .search_options > .reg').hasClass('checked');
-                // 
-                // test
-                ret_pos = Light_TT.selString($editorElt[0], one_search, search_pos, dir, ignoreCase, matchReg);
-                search_pos = ret_pos[0];
-                // save last search info
-                last_search_pos = ret_pos[0];
-                last_search_len = ret_pos[1];
-                // reset pos if need
-                if(search_pos < 0) 
-                    search_pos = 0;
-                else {
-                    if(dir == 0)
-                        search_pos = ret_pos[0] + ret_pos[1];
-                    else {
-                        search_pos = --ret_pos[0];
-                    }
-                }                    
-            }
-        }
-
-        var replace_next = function(e, all) {
-            if(e.type == 'click') {
-                if(e.preventDefault) e.preventDefault();
-                var one_search = $search_field.val();
-                if(one_search == '') 
-                    return; 
-
-                replace_data = $('#lightmode_textarea-searchbox > .replace_form > .search_field').val();
-                if(!all) {
-                    // 需要针对 - 搜索后，修改了内容时，，需要重新进行搜索。。。。。。。。。。。。
-                    // 获取当前选中的值，进行判断，如果是。。。TODO 后续再处理
-
-                    if(one_search != last_search || last_search_len == 0 || last_search_pos == -1) {
-                        //重新搜索
-                        //重置开始位置
-                        search_pos = 0;
-                        search_next(e, 0);
-                    }
-                    if(last_search_pos == -1)
-                        return;
-                    t = $('#wmd-input')[0];
-                    t.value = t.value.substring(0, last_search_pos) + $('#lightmode_textarea-searchbox > .replace_form > .search_field').val() + t.value.substring(last_search_pos + last_search_len);
-
-                    search_next(e, 0);
-                    return;
-                } 
-                // 所有-> 
-                ignoreCase = !$('#lightmode_textarea-searchbox > .search_options > .cap').hasClass('checked');    
-                matchReg = $('#lightmode_textarea-searchbox > .search_options > .reg').hasClass('checked');
-                
-                t = $('#wmd-input')[0];
-                if(matchReg) {
-                    t.value = t.value.replace(new RegExp(one_search, 'g' + ignoreCase?'i':''), replace_data);
-                } else {
-                    if(!ignoreCase)
-                        t.value = t.value.replace(one_search, replace_data);
-                    else {             
-                        // 忽略大小写，则使用           
-                        search_pos = 0;                        
-                        do {
-                            search_next(e, 0);
-                            if(last_search_pos == -1)
-                                break;
-                            t.value = t.value.substring(0, last_search_pos) + replace_data + t.value.substring(last_search_pos + last_search_len);
-                        }while(last_search_pos != -1);
-                    }
-                }
-            }            
-        }
-        
-        $search_field.on('keyup', function(e) {
-            search_next(e, 0);
-        });
-    
-        $('#lightmode_textarea-searchbox > .search_form > .next').click(function(e) {
-            search_next(e, 0);
-        });
-    
-        $('#lightmode_textarea-searchbox > .search_form > .prev').click(function(e) {
-            search_next(e, 1);
-        });
-    
-        // 添加replace
-        $('#lightmode_textarea-searchbox > .replace_form > .replace').click(function(e) {
-            replace_next(e, 0);
-        });
-        $('#lightmode_textarea-searchbox > .replace_form > .all').click(function(e) {
-            replace_next(e, 1);
-        });
-
-    
-    })();
-
     // -------------------------------------------------------------------
     //  YOUR CHANGES GO HERE
     //
@@ -15011,6 +15045,157 @@ define('shortcutMgr',[
             elem.addEventListener(event, listener, false);
         }
     };
+
+
+    // 初始化搜索对话框信息
+    (function() {            
+        var me = this;    
+    //以下可以在全局初始化
+        var $searchbox = $('#lightmode_textarea-searchbox');
+        // hide first
+        $searchbox.hide();
+        // add event
+        //var closeBtn = $('#lightmode_textarea-searchbox .close');
+        $searchbox.on('click', '.close', function(e) {
+            $searchbox.hide();
+        });
+    
+        $searchbox.on('click', '.reg', function(e) {
+            console.log('toggle reg search');
+            $target = $(e.target);
+            if($target.hasClass('checked'))
+                $target.removeClass('checked');
+            else
+                $target.addClass('checked');
+        });
+    
+        $searchbox.on('click', '.cap', function(e) {
+            $target = $(e.target);
+            if($target.hasClass('checked'))
+                $target.removeClass('checked');
+            else
+                $target.addClass('checked');
+        });
+    
+        $searchbox.on('click', '.whole', function(e) {
+            $target = $(e.target);
+            if($target.hasClass('checked'))
+                $target.removeClass('checked');
+            else
+                $target.addClass('checked');
+        });            
+    
+        //添加
+        $search_field = $('#lightmode_textarea-searchbox > .search_form > .search_field');
+        
+        var search_next = function(e, dir) {
+            if(e.keyCode == '13' || e.type == 'click') {
+                if(e.preventDefault) e.preventDefault();
+                var one_search = $search_field.val();
+                if(one_search == '') 
+                    return;
+                
+                // begin search                    
+                // 使用
+                var $editorElt = $('#wmd-input');
+                if(one_search != last_search) {
+                    last_search = one_search;
+                    search_pos = 0;
+                }
+                // 大小写
+                var ignoreCase = !$('#lightmode_textarea-searchbox > .search_options > .cap').hasClass('checked');
+    
+                var matchReg = $('#lightmode_textarea-searchbox > .search_options > .reg').hasClass('checked');
+                // 
+                // test
+                ret_pos = Light_TT.selString($editorElt[0], one_search, search_pos, dir, ignoreCase, matchReg);
+                search_pos = ret_pos[0];
+                // save last search info
+                last_search_pos = ret_pos[0];
+                last_search_len = ret_pos[1];
+                // reset pos if need
+                if(search_pos < 0) 
+                    search_pos = 0;
+                else {
+                    if(dir == 0)
+                        search_pos = ret_pos[0] + ret_pos[1];
+                    else {
+                        search_pos = --ret_pos[0];
+                    }
+                }                    
+            }
+        }
+
+        var replace_next = function(e, all) {
+            if(e.type == 'click') {
+                if(e.preventDefault) e.preventDefault();
+                var one_search = $search_field.val();
+                if(one_search == '') 
+                    return; 
+
+                replace_data = $('#lightmode_textarea-searchbox > .replace_form > .search_field').val();
+                if(!all) {
+                    // 需要针对 - 搜索后，修改了内容时，，需要重新进行搜索。。。。。。。。。。。。
+                    // 获取当前选中的值，进行判断，如果是。。。TODO 后续再处理
+
+                    if(one_search != last_search || last_search_len == 0 || last_search_pos == -1) {
+                        //重新搜索
+                        //重置开始位置
+                        search_pos = 0;
+                        search_next(e, 0);
+                    }
+                    if(last_search_pos == -1)
+                        return;
+                    t = $('#wmd-input')[0];
+                    t.value = t.value.substring(0, last_search_pos) + $('#lightmode_textarea-searchbox > .replace_form > .search_field').val() + t.value.substring(last_search_pos + last_search_len);
+
+                    search_next(e, 0);
+                    return;
+                } 
+                // 所有-> 
+                ignoreCase = !$('#lightmode_textarea-searchbox > .search_options > .cap').hasClass('checked');    
+                matchReg = $('#lightmode_textarea-searchbox > .search_options > .reg').hasClass('checked');
+                
+                t = $('#wmd-input')[0];
+                if(matchReg) {
+                    t.value = t.value.replace(new RegExp(one_search, 'g' + ignoreCase?'i':''), replace_data);
+                } else {
+                    if(!ignoreCase)
+                        t.value = t.value.replace(one_search, replace_data);
+                    else {             
+                        // 忽略大小写，则使用           
+                        search_pos = 0;                        
+                        do {
+                            search_next(e, 0);
+                            if(last_search_pos == -1)
+                                break;
+                            t.value = t.value.substring(0, last_search_pos) + replace_data + t.value.substring(last_search_pos + last_search_len);
+                        }while(last_search_pos != -1);
+                    }
+                }
+            }            
+        }
+        
+        $search_field.on('keyup', function(e) {
+            search_next(e, 0);
+        });
+    
+        $('#lightmode_textarea-searchbox > .search_form > .next').click(function(e) {
+            search_next(e, 0);
+        });
+    
+        $('#lightmode_textarea-searchbox > .search_form > .prev').click(function(e) {
+            search_next(e, 1);
+        });
+    
+        // 添加replace
+        $('#lightmode_textarea-searchbox > .replace_form > .replace').click(function(e) {
+            replace_next(e, 0);
+        });
+        $('#lightmode_textarea-searchbox > .replace_form > .all').click(function(e) {
+            replace_next(e, 1);
+        });    
+    })();
 
 
     // Removes a listener callback from a DOM element which is fired on a specified
@@ -16996,32 +17181,9 @@ define('shortcutMgr',[
         if(search_default != '') {            
             $search_field.val(search_default);
         }
-
         $('#lightmode_textarea-searchbox').show();
         $search_field.focus();
-
         return true;
-
-        // show searchbox        
-        // var rx;
-        // var pop = $('#lightmode_textarea-searchbox');
-        // pop.hide();
-        // if(search_default != '' ){ 
-        //     var rx =new RegExp(search_default, 'g'); 
-        //     if(rx.test($editorElt.val())) {                
-        //         if(!pop.attr('init'))
-        //             pop.css({left:$editorElt.offset().left,
-        //                  top:$editorElt.offset().top,
-        //                  width:$editorElt.width(),
-        //                  height:$editorElt.height()});
-            
-        //         pop.html($editorElt.val().replace(rx,'<span class="kw">'+search_default+'</span>'));
-        //         pop.show();
-        //     }
-            
-        // }
-    
-
     }
 
     // 这里, 应该用 ``` ```

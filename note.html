@@ -42,8 +42,7 @@
 
     <style type="text/css">
         .kw{background:#f00;color:#fff;}
-        .textarea-searchbox{position:absolute;display:none;border:solid 0px #000;background:#fff;overflow:auto;font-size:13px;}
-        .textarea-searchbox .close{text-align:right;color:blue}
+        .current{background:yellowgreen;}
     </style>
        
     <script>
@@ -539,8 +538,21 @@
                                                 <div class="preview-container">
                                                     <div id="preview-contents">
                                                         <div id="wmd-preview" class="preview-content"></div>
-                                                    </div>
+                                                    </div>                                                    
                                                 </div>
+                                                <div id="md_preview-searchbox" class="right" style="display: none;">
+                                                    <button type="button" action="#" class="close"></button>
+                                                    <div class="search_form">
+                                                        <input class="search_field lang-placeholder" placeholder="Search for" spellcheck="false">
+                                                        <button type="button" action="#" class="searchbtn next"></button>
+                                                        <button type="button" action="#" class="searchbtn prev"></button>                                                            
+                                                    </div>                                                        
+                                                    <div class="search_options">                                                            
+                                                        <span action="#" class="button lang-title cap" title="CaseSensitive Search">Aa</span>                                                            
+                                                    </div>
+                                                
+                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
