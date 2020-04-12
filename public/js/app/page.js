@@ -546,7 +546,7 @@ function initEditor() {
 // 导航
 var random = 1;
 
-function scrollTo(self, tagName, text) {
+function mce_scrollTo(self, tagName, text) {
     var iframe = $("#editorContent"); // .contents();
     if (Writting.isWriting()) {
         iframe = $('#editorContentWrap');
@@ -626,6 +626,8 @@ $(function() {
         var $leanoteNav = $(this).closest('.leanoteNav');
         if (!$leanoteNav.hasClass("unfolder")) {
             $leanoteNav.addClass("unfolder");
+            // 如果显示了搜索框，则隐藏
+            $('#md_preview-searchbox').hide();
         } else {
             $leanoteNav.removeClass("unfolder");
         }

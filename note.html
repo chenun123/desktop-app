@@ -560,9 +560,11 @@
                                         <div id="leanoteNavMd" class="leanoteNav">
                                             <h1>
                                                 <i class="fa fa-align-justify" title="Note nav"></i>
-                                                <span class="lang">nav</span>
+                                                <span class="lang">nav</span>                                                
                                             </h1>
-                                            <div id="leanoteNavContentMd" class="leanoteNavContent table-of-contents">
+                                            <!-- 添加开关flag -->
+                                            <span id="preview_list_flag" action="#" class="lang-title fa fa-eye-slash pull-left list_flag" title="toggle li flag"></span>
+                                            <div id="leanoteNavContentMd" class="leanoteNavContent table-of-contents" style="height:auto;">
                                             </div>
                                         </div>
                                     </div>
@@ -801,8 +803,8 @@
         <!-- 导入插件 执行 -->
         <script src="public/js/main.js"></script>
         <!-- markdown editor -->
-        <!-- <script src="public/md/main-v2.min.js"></script> -->
-        <script src="public/md/main-v2.js"></script>
+        <script src="public/md/main-v2.min.js"></script>
+        <!-- <script src="public/md/main-v2.js"></script> -->
 
         <!-- extra额外 -->
         <script src="public/js/dec/main.js"></script>

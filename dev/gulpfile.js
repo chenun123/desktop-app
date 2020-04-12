@@ -13,6 +13,7 @@ var rename = require('gulp-rename');
 var styleDir = '../public/themes';
 var styleDir2 = '../public/css';
 var jsTinymceDir = '../public/tinymce';
+var jsMdDir = '../public/md';
 
 // 解析less
 gulp.task('less', done => {
@@ -62,6 +63,35 @@ gulp.task('js2', done => {
     done();
 });
 
+gulp.task('md', done => {
+    gulp.src(jsMdDir + '/main-v2.js')
+        .pipe(rename({suffix:'.min'}))
+        .pipe(uglify({
+            // 混淆变量名
+            mangle: true,
+            // 输出时将所有的中文转换为unicode
+            output: {ascii_only: true}
+            // 将所有压缩后的代码置于des/js/文件夹
+        }))        
+        .pipe(gulp.dest(jsMdDir));
+    gutil.log(gutil.colors.green('js  ok'));
+    done();
+});
+
+gulp.task('mce_nav_plugin', done => {
+    gulp.src(jsTinymceDir + '/plugins/leanote_nav/plugin.js')
+        .pipe(rename({suffix:'.min'}))
+        .pipe(uglify({
+            // 混淆变量名
+            mangle: true,
+            // 输出时将所有的中文转换为unicode
+            output: {ascii_only: true}
+            // 将所有压缩后的代码置于des/js/文件夹
+        }))        
+        .pipe(gulp.dest(jsTinymceDir + '/plugins/leanote_nav/'));
+    gutil.log(gutil.colors.green('js  ok'));
+    done();
+});
 
 // 开发服务
 gulp.task('dev', gulp.series('less', function() {

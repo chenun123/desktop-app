@@ -12807,6 +12807,7 @@ define('extensions/toc',[
     function groupTags(array, level) {
         level = level || 1;
         var tagName = "H" + level;
+        var liTagName = "L" + level;
         var result = [];
 
         var currentElement;
@@ -12820,7 +12821,7 @@ define('extensions/toc',[
         }
 
         _.each(array, function(element) {
-            if(element.tagName != tagName) {
+            if(element.tagName != tagName && element.tagName != liTagName) {
                 if(level !== toc.config.maxDepth) {
                     if(currentElement === undefined) {
                         currentElement = new TocElement();
@@ -12841,8 +12842,8 @@ define('extensions/toc',[
     var previewContentsElt;
     function buildToc() {
         var anchorList = {};
-        function createAnchor(element) {
-            var id = element.id || utils.slugify(element.textContent) || 'title';
+        function createAnchor(element, eid) {
+            var id = element.id || eid|| utils.slugify(element.textContent) || 'title';
             var anchor = id;
             var index = 0;
             while (_.has(anchorList, anchor)) {
@@ -12855,8 +12856,44 @@ define('extensions/toc',[
         }
 
         var elementList = [];
-        _.each(previewContentsElt.querySelectorAll('h1, h2, h3, h4, h5, h6'), function(elt) {
-            elementList.push(new TocElement(elt.tagName, createAnchor(elt), elt.textContent));
+        // 添加li时，textContent内容包括所有text信息
+        function getTagName(element) {
+            if(element.tagName.startsWith('H'))
+                return element.tagName;
+            //li , find parentH
+            // 默认Li从2开始
+            var tg = 'X2';
+            var maybe_parent = $(element).parent().prev();
+            while(maybe_parent.length > 0) {
+                if(maybe_parent[0].tagName.startsWith('H')) {
+                    //found , next level
+                    return 'L' + (Number(maybe_parent[0].tagName.substring(1)) +1);
+                }
+                if(maybe_parent.hasClass('se-section-delimiter'))
+                    return 'L2';
+                maybe_parent = maybe_parent.prev();
+            }            
+            return tg;
+        }
+        // 此处，添加是否展示Li的设置
+        var pv_list_flag = $('#preview_list_flag').hasClass('checked');
+
+
+        _.each(previewContentsElt.querySelectorAll('h1, h2, h3, h4, h5, h6' + (pv_list_flag?', li':'')), function(elt) {
+            var cur_tagName = getTagName(elt);
+            if(cur_tagName.startsWith('X'))
+                return;
+            // 针对LI，标题，需要进行处理，因为显示，则可直接从-截取
+            var cur_text = elt.textContent;
+            var eid = undefined;
+            if(cur_tagName.startsWith('L')) {
+                var pos = cur_text.indexOf('\n')
+                if(pos > 0) {
+                    cur_text = cur_text.substring(0, pos);
+                    eid = utils.slugify(cur_text);
+                }                    
+            }
+            elementList.push(new TocElement(cur_tagName, createAnchor(elt, eid), cur_text));
         });
         elementList = groupTags(elementList);
         return '<div class="toc">\n<ul>\n' + elementList.join("") + '</ul>\n</div>\n';
@@ -13282,7 +13319,8 @@ define('extensions/scrollLink',[
                 return;
             }
             evt.preventDefault();
-            var anchorElt = $('#preview-contents ' + decodeURIComponent(id));
+            var tmp_id = id.replace(':', '\\:');
+            var anchorElt = $('#preview-contents ' + decodeURIComponent(tmp_id));
             if(!anchorElt.length) {
                 return;
             }
@@ -14623,13 +14661,13 @@ define('shortcutMgr',[
         // 移到下一目标
         var focusMove = function (next_pos) {
             //首先清除上一个标识节点
-            let $last_item = $('.kw.current');
+            $last_item = $('.kw.current');
             if ($last_item.length > 0) {
                 $last_item.removeClass('current');
             }
 
             //查询指定的节点
-            let $next_item = $('#result' + next_pos);
+            $next_item = $('#result' + next_pos);
             if ($next_item.length > 0) {
                 $next_item.addClass('current');
                 //scoll page if need
@@ -14713,13 +14751,17 @@ define('shortcutMgr',[
             if (!evt.altKey && !evt.shiftKey && (evt.metaKey || evt.ctrlKey)) {
                 // ctrl +f// 判断是否为MD 
                 if (evt.keyCode == 70 && LEA.isMarkdownEditor() && MD) {
+                    // 判断，如果编辑器正在获取焦点，则不弹出
+                    if(evt.srcElement.tagName == 'INPUT')
+                        return;
+                    
                     $searchbox = $('#md_preview-searchbox');
                     $searchbox.show();
+                    if($('#leanoteNavMd').hasClass('unfolder')) $('#leanoteNavMd').removeClass('unfolder');
                     $('#md_preview-searchbox > .search_form > .search_field').focus();
                 }
             }
         });
-
     }
 
     var defaultsStrings = {
@@ -16176,10 +16218,11 @@ define('shortcutMgr',[
                             if (key.preventDefault) {
                                 key.preventDefault();
                             }
-                            //
+                            
                             var fakeButton = {};
                             fakeButton.textOp = bindCommand("doFind");
                             doClick(fakeButton);
+                            return false;
                         }
                         break;
                     default:
@@ -17641,6 +17684,20 @@ define('core',[
 
     var $mdKeyboardMode;
 
+    (function(){
+        $('#preview_list_flag').click(function() {
+            if($(this).hasClass('checked')) {
+                $(this).removeClass('checked');
+                $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                $(this).addClass('checked');
+                $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+            // 都需要重新刷新reflush
+            if(editor) editor.refreshPreview();
+        });
+    })();
+
     core._resetToolBar = function () {
         /*
         <ul class="nav left-buttons">
@@ -17869,6 +17926,10 @@ define('core',[
         converter.setOptions(options);
 
         return converter;
+    }
+
+    core.refreshPreview = function() {
+        if(editor) editor.refreshPreview();
     }
 
     // 初始化
